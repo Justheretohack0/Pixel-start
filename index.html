@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="grid-container">
+        <!-- Datetime -->
+        <fieldset class="box datetime">
+            <legend>datetime</legend>
+            <div id="time">00:00:00</div>
+            <div id="date">Thursday, July 24, 2025</div>
+        </fieldset>
+
+        <!-- Stats -->
+        <fieldset class="box stats">
+            <legend>stats</legend>
+            <div class="stat-row">
+                <span>load</span> <span id="load">24 ms</span>
+            </div>
+            <div class="stat-row">
+                <span>ping</span> <span id="ping">348 ms</span>
+            </div>
+            <div class="stat-row">
+                <span>fps</span> <span id="fps">165</span>
+            </div>
+            <div class="stat-row">
+                <span>res</span> <span>1920 x 1080</span>
+            </div>
+        </fieldset>
+
+        <!-- Weather -->
+        <fieldset class="box weather">
+            <legend>weather</legend>
+            <div class="current-weather">
+                <div id="temp">72°</div>
+                <div id="condition">sunny</div>
+            </div>
+            <div class="weather-details">
+                <div>humi <span id="humidity">51%</span></div>
+                <div>wind <span id="wind">6 mph</span></div>
+                <div>prec <span id="precip">1%</span></div>
+                <div>feel <span id="feels-like">70°</span></div>
+            </div>
+            <div class="forecast">
+                <div class="forecast-row"><span>11 pm</span><span>63°</span><span>clear</span></div>
+                <div class="forecast-row"><span>2 am</span><span>59°</span><span>clear</span></div>
+                <div class="forecast-row"><span>5 am</span><span>60°</span><span>cloudy</span></div>
+                <div class="forecast-row"><span>8 am</span><span>59°</span><span>cloudy</span></div>
+                <div class="forecast-row"><span>11 am</span><span>61°</span><span>cloudy</span></div>
+            </div>
+        </fieldset>
+
+        <!-- Todoist -->
+        <fieldset class="box todo">
+            <legend>todoist</legend>
+            <div class="todo-header">6 tasks</div>
+            <ul id="todo-list">
+                <!-- Tasks will be injected by JS -->
+            </ul>
+        </fieldset>
+
+        <!-- Links -->
+        <fieldset class="box links">
+            <legend>links</legend>
+            <div class="links-grid">
+                <div class="link-col">
+                    <a href="https://gmail.com">> gmail</a>
+                    <a href="https://calendar.google.com">> calendar</a>
+                    <a href="https://drive.google.com">> drive</a>
+                    <a href="https://docs.google.com">> docs</a>
+                </div>
+                <div class="link-col">
+                    <a href="https://github.com">> github</a>
+                    <a href="https://slack.com">> slack</a>
+                    <a href="https://keep.google.com">> keep</a>
+                    <a href="https://leetcode.com">> leetcode</a>
+                </div>
+                <div class="link-col">
+                    <a href="https://perplexity.ai">> perplexity</a>
+                    <a href="https://claude.ai">> claude</a>
+                    <a href="https://aistudio.google.com">> aistudio</a>
+                    <a href="https://chat.openai.com">> chatgpt</a>
+                </div>
+                <div class="link-col">
+                    <a href="https://youtube.com">> youtube</a>
+                    <a href="https://reddit.com">> reddit</a>
+                    <a href="https://twitter.com">> twitter</a>
+                    <a href="https://feedly.com">> feedly</a>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

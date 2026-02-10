@@ -1,0 +1,203 @@
+/* Reset & Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #0d0d0d;
+    color: #e0e0e0;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 14px;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        "datetime datetime stats"
+        "weather todo todo"
+        "links links links";
+    grid-template-columns: 250px 250px 250px;
+    grid-template-rows: auto auto auto;
+    gap: 20px;
+    padding: 20px;
+    max-width: 800px;
+}
+
+/* Fieldset/Box Styling */
+fieldset.box {
+    border: 1px solid #333;
+    padding: 15px;
+    position: relative;
+    border-radius: 4px;
+}
+
+legend {
+    color: #555;
+    padding: 0 5px;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+
+/* Area Assignments */
+.datetime { grid-area: datetime; }
+.stats { grid-area: stats; }
+.weather { grid-area: weather; }
+.todo { grid-area: todo; }
+.links { grid-area: links; }
+
+/* Section Specifics */
+
+/* Datetime */
+#time {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 5px;
+    color: #eee;
+}
+
+#date {
+    color: #777;
+    font-size: 1.1rem;
+}
+
+/* Stats */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    color: #999;
+}
+
+.stat-row span:last-child {
+    color: #ccc;
+}
+
+/* Weather */
+.current-weather {
+    margin-bottom: 15px;
+}
+
+#temp {
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+#condition {
+    color: #777;
+    margin-top: -5px;
+}
+
+.weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    color: #999;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+}
+
+.weather-details span {
+    color: #ccc;
+    margin-left: 5px;
+}
+
+.forecast {
+    border-top: 1px solid #222;
+    padding-top: 10px;
+}
+
+.forecast-row {
+    display: flex;
+    justify-content: space-between;
+    color: #777;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+}
+
+/* Todoist */
+.todo-header {
+    color: #777;
+    margin-bottom: 15px;
+}
+
+#todo-list {
+    list-style: none;
+}
+
+.todo-item {
+    margin-bottom: 8px;
+    color: #aaa;
+    display: flex;
+    align-items: baseline;
+    cursor: pointer;
+}
+
+.todo-item:hover {
+    color: #fff;
+}
+
+.todo-item.done {
+    text-decoration: line-through;
+    color: #555;
+}
+
+.todo-check {
+    margin-right: 10px;
+    font-family: monospace;
+}
+
+/* Links */
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.link-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.link-col a {
+    color: #aaa;
+}
+
+.link-col a:hover {
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+    .grid-container {
+        grid-template-areas:
+            "datetime"
+            "stats"
+            "weather"
+            "todo"
+            "links";
+        grid-template-columns: 1fr;
+    }
+    
+    .links-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
