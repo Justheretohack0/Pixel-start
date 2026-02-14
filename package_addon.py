@@ -4,7 +4,14 @@ import os
 def create_xpi(source_dir, output_filename):
     with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(source_dir):
+            # Exclude hidden directories
+            dirs[:] = [d for d in dirs if d not in ['.git', '__pycache__', '.idea', '.vscode']]
+
             for file in files:
+                # Exclude build artifacts and system files
+                if file.endswith(('.xpi', '.zip', '.DS_Store')):
+                    continue
+
                 file_path = os.path.join(root, file)
                 # Calculate the relative path for the archive
                 arcname = os.path.relpath(file_path, source_dir)
