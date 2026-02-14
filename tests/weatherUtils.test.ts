@@ -54,19 +54,30 @@ describe('getWeatherCondition', () => {
     assert.strictEqual(getWeatherCondition(55), 'Drizzle');
   });
 
-  it('should return Rain for codes 61-67', () => {
+  it('should return Freezing Drizzle for codes 56 and 57', () => {
+    assert.strictEqual(getWeatherCondition(56), 'Freezing Drizzle');
+    assert.strictEqual(getWeatherCondition(57), 'Freezing Drizzle');
+  });
+
+  it('should return Rain for codes 61-65', () => {
     assert.strictEqual(getWeatherCondition(61), 'Rain');
     assert.strictEqual(getWeatherCondition(63), 'Rain');
     assert.strictEqual(getWeatherCondition(65), 'Rain');
-    assert.strictEqual(getWeatherCondition(66), 'Rain');
-    assert.strictEqual(getWeatherCondition(67), 'Rain');
   });
 
-  it('should return Snow for codes 71-77', () => {
+  it('should return Freezing Rain for codes 66 and 67', () => {
+    assert.strictEqual(getWeatherCondition(66), 'Freezing Rain');
+    assert.strictEqual(getWeatherCondition(67), 'Freezing Rain');
+  });
+
+  it('should return Snow for codes 71-75', () => {
     assert.strictEqual(getWeatherCondition(71), 'Snow');
     assert.strictEqual(getWeatherCondition(73), 'Snow');
     assert.strictEqual(getWeatherCondition(75), 'Snow');
-    assert.strictEqual(getWeatherCondition(77), 'Snow');
+  });
+
+  it('should return Snow Grains for code 77', () => {
+    assert.strictEqual(getWeatherCondition(77), 'Snow Grains');
   });
 
   it('should return Showers for codes 80-82', () => {
@@ -75,10 +86,18 @@ describe('getWeatherCondition', () => {
     assert.strictEqual(getWeatherCondition(82), 'Showers');
   });
 
-  it('should return Thunderstorm for codes 95-99', () => {
+  it('should return Snow Showers for codes 85 and 86', () => {
+    assert.strictEqual(getWeatherCondition(85), 'Snow Showers');
+    assert.strictEqual(getWeatherCondition(86), 'Snow Showers');
+  });
+
+  it('should return Thunderstorm for code 95', () => {
     assert.strictEqual(getWeatherCondition(95), 'Thunderstorm');
-    assert.strictEqual(getWeatherCondition(96), 'Thunderstorm');
-    assert.strictEqual(getWeatherCondition(99), 'Thunderstorm');
+  });
+
+  it('should return Thunderstorm with Hail for codes 96 and 99', () => {
+    assert.strictEqual(getWeatherCondition(96), 'Thunderstorm with Hail');
+    assert.strictEqual(getWeatherCondition(99), 'Thunderstorm with Hail');
   });
 
   it('should return Unknown for unmapped codes', () => {

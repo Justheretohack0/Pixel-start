@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { WeatherIcon } from './WeatherIcons';
+// Import utility for consistent weather condition text
 import { convertTemp, TempUnit, getWeatherCondition } from '../utils/weatherUtils';
 
 interface WeatherWidgetProps {
