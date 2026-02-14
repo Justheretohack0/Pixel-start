@@ -41,15 +41,36 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
         canvas.width = width;
         canvas.height = height;
 
-        const getColors = () => {
+        let currentColors: { bg: string; fg: string; accent: string; muted: string };
+        const updateColors = () => {
             const root = getComputedStyle(document.documentElement);
-            return {
+            currentColors = {
                 bg: root.getPropertyValue('--color-bg').trim(),
                 fg: root.getPropertyValue('--color-fg').trim(),
                 accent: root.getPropertyValue('--color-accent').trim(),
                 muted: root.getPropertyValue('--color-muted').trim(),
             };
         };
+
+        // Initialize colors immediately
+        updateColors();
+
+        // Observe theme changes
+        const observer = new MutationObserver((mutations) => {
+            // Check if relevant attributes changed
+            const shouldUpdate = mutations.some(m =>
+                m.type === 'attributes' &&
+                (m.attributeName === 'style' || m.attributeName === 'class' || m.attributeName === 'data-theme')
+            );
+            if (shouldUpdate) {
+                updateColors();
+            }
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme'],
+        });
 
         const sparkChars = ['*', '·', '✦', '✧', '+', '•', '°', '¤'];
         let particles: Particle[] = [];
@@ -75,14 +96,13 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
         };
 
         const launchRocket = () => {
-            const colors = getColors();
             const rocketSpeed = height * 0.015; // scale rocket speed to widget height
             rockets.push({
                 x: width * 0.1 + Math.random() * width * 0.8, // keep within 10-90% of width
                 y: height,
                 vy: -(rocketSpeed + Math.random() * rocketSpeed),
                 targetY: height * (0.15 + Math.random() * 0.35),
-                color: Math.random() > 0.5 ? colors.accent : colors.fg,
+                color: Math.random() > 0.5 ? currentColors.accent : currentColors.fg,
             });
         };
 
@@ -105,11 +125,9 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
             if (timestamp - lastTime < interval) return;
             lastTime = timestamp;
 
-            const colors = getColors();
-
             // Full clear each frame — no burn-in
             ctx.globalAlpha = 1.0;
-            ctx.fillStyle = colors.bg;
+            ctx.fillStyle = currentColors.bg;
             ctx.fillRect(0, 0, width, height);
 
             // Launch rockets periodically
@@ -155,8 +173,7 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
         };
 
         // Initial clear
-        const bg = getColors().bg;
-        ctx.fillStyle = bg;
+        ctx.fillStyle = currentColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         animationId = requestAnimationFrame(render);
@@ -164,6 +181,7 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            observer.disconnect();
         };
     }, [speed, explosionSize]);
 
