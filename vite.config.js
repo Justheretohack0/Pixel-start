@@ -4,11 +4,13 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  // recursive alias for absolute imports
   resolve: {
     alias: {
-      '@': path.resolve('.', '.')
+      '@': path.resolve(__dirname, './')
     }
   },
+  base: '/Pixel-start/',
   build: {
     outDir: 'dist',
     emptyOutDir: true
