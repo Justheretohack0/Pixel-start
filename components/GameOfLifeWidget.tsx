@@ -34,6 +34,15 @@ export const GameOfLifeWidget: React.FC<GameOfLifeWidgetProps> = ({ speed = 50 }
             };
         };
 
+        let colors = getColors();
+        const colorObserver = new MutationObserver(() => {
+            colors = getColors();
+        });
+        colorObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme']
+        });
+
         // Grid state
         let grid: boolean[][] = [];
         let generation = 0;
@@ -121,8 +130,6 @@ export const GameOfLifeWidget: React.FC<GameOfLifeWidgetProps> = ({ speed = 50 }
 
             step();
 
-            const colors = getColors();
-
             // Draw
             ctx.fillStyle = colors.bg;
             ctx.fillRect(0, 0, width, height);
@@ -157,6 +164,7 @@ export const GameOfLifeWidget: React.FC<GameOfLifeWidgetProps> = ({ speed = 50 }
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            colorObserver.disconnect();
         };
     }, [speed]);
 

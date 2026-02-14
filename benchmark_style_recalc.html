@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Recalculation Benchmark</title>
+    <style>
+        :root {
+            --color-bg: #0d0d0d;
+            --color-accent: #ffffff;
+            --color-muted: #777777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Style Recalculation Benchmark</h1>
+    <p>Open the console to see the results.</p>
+    <div id="results"></div>
+
+    <script>
+        const iterations = 10000;
+        const root = document.documentElement;
+
+        function getColors() {
+            const style = getComputedStyle(root);
+            return {
+                bg: style.getPropertyValue('--color-bg').trim(),
+                accent: style.getPropertyValue('--color-accent').trim(),
+                muted: style.getPropertyValue('--color-muted').trim(),
+            };
+        }
+
+        // Benchmark 1: getComputedStyle inside loop
+        const start1 = performance.now();
+        for (let i = 0; i < iterations; i++) {
+            getColors();
+        }
+        const end1 = performance.now();
+        const time1 = end1 - start1;
+
+        // Benchmark 2: Cached colors
+        const start2 = performance.now();
+        const cachedColors = getColors();
+        for (let i = 0; i < iterations; i++) {
+            // Simulate access
+            const c = cachedColors;
+        }
+        const end2 = performance.now();
+        const time2 = end2 - start2;
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `
+            <p>Iterations: ${iterations}</p>
+            <p><strong>With getComputedStyle:</strong> ${time1.toFixed(2)} ms</p>
+            <p><strong>Cached:</strong> ${time2.toFixed(2)} ms</p>
+            <p><strong>Improvement:</strong> ${(time1 / time2).toFixed(2)}x faster</p>
+        `;
+
+        console.log(`Iterations: ${iterations}`);
+        console.log(`With getComputedStyle: ${time1.toFixed(2)} ms`);
+        console.log(`Cached: ${time2.toFixed(2)} ms`);
+        console.log(`Improvement: ${(time1 / time2).toFixed(2)}x faster`);
+    </script>
+</body>
+</html>
