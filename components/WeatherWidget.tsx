@@ -1,26 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { WeatherIcon } from './WeatherIcons';
-import { convertTemp, TempUnit } from '../utils/weatherUtils';
+import { convertTemp, TempUnit, getWeatherCondition } from '../utils/weatherUtils';
 
 interface WeatherWidgetProps {
   mode?: 'standard' | 'icon';
   unit?: TempUnit;
 }
-
-// Map WMO Weather Codes to text conditions
-const getWeatherCondition = (code: number, isDay: number = 1): string => {
-  if (code === 0) return isDay ? 'Sunny' : 'Clear Sky';
-  if (code === 1) return isDay ? 'Mainly Sunny' : 'Mainly Clear';
-  if (code === 2) return 'Partly Cloudy';
-  if (code === 3) return 'Overcast';
-  if (code === 45 || code === 48) return 'Foggy';
-  if (code >= 51 && code <= 55) return 'Drizzle';
-  if (code >= 61 && code <= 67) return 'Rain';
-  if (code >= 71 && code <= 77) return 'Snow';
-  if (code >= 80 && code <= 82) return 'Showers';
-  if (code >= 95 && code <= 99) return 'Thunderstorm';
-  return 'Unknown';
-};
 
 interface WeatherData {
   locationName?: string;
