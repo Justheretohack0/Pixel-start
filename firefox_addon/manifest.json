@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "Pixel Start",
+  "version": "2.1",
+  "description": "A beautiful, customizable TUI-style new tab dashboard with widgets, themes, and more.",
+  "icons": {
+    "48": "icon48.png",
+    "96": "icon96.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pixelstart@straightheart.dev",
+      "strict_min_version": "109.0"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "TUI Pixel Startpage",
+  "description": "A highly customizable, terminal-styled startpage with theme support, productivity tools, and system stats.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
