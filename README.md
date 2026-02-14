@@ -66,10 +66,11 @@ Output: `pixel-start-v2.1.xpi`
 4. Click **Load unpacked**
 5. Select the `firefox_addon` folder
 
-
-## Note
-
 `package_addon.py` ensures correct ZIP formatting for Firefox validation.
 
+## Notes
 
-Will add a firefox addon link here when it is approved.
+
+- Hover over the top right section for settings.
+
+- Will add a firefox addon link here when it is approved.
