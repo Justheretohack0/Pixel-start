@@ -36,4 +36,4 @@ def create_source_zip(output_filename):
     print(f"Successfully created source zip: {output_path}")
 
 if __name__ == "__main__":
-    create_source_zip("pixel-start-source-v2.1.zip")
+    create_source_zip("pixel-start-source-v2.2.zip")
