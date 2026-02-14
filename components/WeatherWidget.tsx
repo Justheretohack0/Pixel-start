@@ -1,16 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { WeatherIcon } from './WeatherIcons';
+import { convertTemp, TempUnit } from '../utils/weatherUtils';
 
 interface WeatherWidgetProps {
   mode?: 'standard' | 'icon';
-  unit?: 'C' | 'F';
+  unit?: TempUnit;
 }
-
-// ... helper for temp conversion ...
-const convertTemp = (tempF: number, unit: 'C' | 'F'): number => {
-  if (unit === 'F') return tempF;
-  return Math.round((tempF - 32) * 5 / 9);
-};
 
 // Map WMO Weather Codes to text conditions
 const getWeatherCondition = (code: number, isDay: number = 1): string => {
