@@ -10,7 +10,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './')
     }
   },
-  base: '/Pixel-start/',
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true

@@ -14,8 +14,9 @@ def create_xpi(source_dir, output_filename):
     print(f"Successfully created {output_filename}")
 
 # Paths
-addon_dir = r"c:\Users\Straightheart\Downloads\Pixel-start-demo-main-20260212T085125Z-1-001\Pixel-start-demo-main\firefox_addon"
-output_xpi = r"c:\Users\Straightheart\Downloads\Pixel-start-demo-main-20260212T085125Z-1-001\Pixel-start-demo-main\pixel-start-v2.2.xpi"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+addon_dir = os.path.join(base_dir, "firefox_addon")
+output_xpi = os.path.join(base_dir, "pixel-start-v2.2.xpi")
 
 if __name__ == "__main__":
     if os.path.exists(output_xpi):

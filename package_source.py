@@ -11,7 +11,7 @@ def create_source_zip(output_filename):
     ]
     include_dirs = ["components", "firefox_addon"]
 
-    base_dir = r"c:\Users\Straightheart\Downloads\Pixel-start-demo-main-20260212T085125Z-1-001\Pixel-start-demo-main"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     output_path = os.path.join(base_dir, output_filename)
 
     with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
