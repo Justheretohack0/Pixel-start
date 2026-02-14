@@ -122,14 +122,27 @@ export const MatrixWidget: React.FC<MatrixWidgetProps> = ({ options, speed = 50 
         let animationId: number;
         let lastTime = 0;
 
-        const getColors = () => {
+        let cachedColors = { bg: '#000', fg: '#fff', accent: '#0f0' };
+
+        const updateColors = () => {
             const style = getComputedStyle(document.documentElement);
-            return {
+            cachedColors = {
                 bg: style.getPropertyValue("--color-bg").trim() || '#000',
                 fg: style.getPropertyValue("--color-fg").trim() || '#fff',
                 accent: style.getPropertyValue("--color-accent").trim() || '#0f0'
             };
         };
+
+        updateColors();
+
+        const themeObserver = new MutationObserver(() => {
+            updateColors();
+        });
+
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme']
+        });
 
         const render = (timestamp: number) => {
             animationId = requestAnimationFrame(render);
@@ -187,7 +200,7 @@ export const MatrixWidget: React.FC<MatrixWidgetProps> = ({ options, speed = 50 
             }
 
             // Draw
-            const { bg, fg, accent } = getColors();
+            const { bg, fg, accent } = cachedColors;
             ctx.font = `bold ${fontSize}px "JetBrains Mono", monospace`;
             ctx.textBaseline = 'top';
 
@@ -222,6 +235,7 @@ export const MatrixWidget: React.FC<MatrixWidgetProps> = ({ options, speed = 50 
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            themeObserver.disconnect();
         };
     }, [activeSpeed, charMode, fade, glow, fontSize]);
 
