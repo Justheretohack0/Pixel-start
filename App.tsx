@@ -516,24 +516,39 @@ export default function App() {
             const isExtra = key.includes('-');
             const type = isExtra ? key.split('-')[0] : key;
 
+            // Generate title suffix logic
+            // Need to know how many widgets of this type exist and their order.
+            // This is computationally expensive inside render if we filter every time.
+            // But activeWidgets count is small (<50 usually).
+
+            // Find all active keys for this type
+            const allInstances = Object.keys(activeWidgets)
+                .filter(k => k === type || (k.startsWith(`${type}-`) && activeWidgets[k]))
+                .sort(); // Sort alphabetically: 'snake' comes before 'snake-...'
+
+            // Find index of current key
+            const index = allInstances.indexOf(key);
+            // Suffix is empty for index 0, "2" for index 1, "3" for index 2...
+            const suffix = index > 0 ? (index + 1).toString() : '';
+
             // Common props
             const boxProps = {
                 key: key,
-                title: isExtra ? `${type}.exe (${key.split('-')[1].slice(-4)})` : (
+                title: (
                     ['snake', 'life', 'fireworks', 'starfield', 'rain', 'maze', 'pipes', 'matrix', 'donut'].includes(type)
-                        ? (type === 'life' ? 'conway.life' :
-                           type === 'donut' ? 'donut.c' :
-                           type === 'pipes' ? 'pipes.scr' :
-                           type === 'matrix' ? 'matrix' :
-                           type === 'snake' ? 'snake.exe' :
-                           type === 'fireworks' ? 'fireworks.py' :
-                           type === 'starfield' ? 'starfield.scr' :
-                           type === 'rain' ? 'rain.sh' :
-                           type === 'maze' ? 'maze.gen' : type)
-                        : (type === 'todo' ? 'todo-list' : type === 'search' ? 'web_search' : type)
+                        ? (type === 'life' ? `conway.life${suffix ? suffix : ''}` :
+                           type === 'donut' ? `donut${suffix}.c` :
+                           type === 'pipes' ? `pipes${suffix}.scr` :
+                           type === 'matrix' ? `matrix${suffix}` :
+                           type === 'snake' ? `snake${suffix}.exe` :
+                           type === 'fireworks' ? `fireworks${suffix}.py` :
+                           type === 'starfield' ? `starfield${suffix}.scr` :
+                           type === 'rain' ? `rain${suffix}.sh` :
+                           type === 'maze' ? `maze${suffix}.gen` : `${type}${suffix}`)
+                        : (type === 'todo' ? 'todo-list' : type === 'search' ? 'web_search' : `${type}${suffix}`)
                 ),
                 showTitle: showWidgetTitles,
-                onClose: isExtra ? () => removeExtraWidget(key) : undefined
+                onClose: undefined // No on-widget close button as per user request
             };
 
             switch (type) {
