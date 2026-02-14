@@ -38,6 +38,16 @@ export const StarfieldWidget: React.FC<StarfieldWidgetProps> = ({ speed = 50 }) 
             };
         };
 
+        let currentColors = getColors();
+
+        const observer = new MutationObserver(() => {
+            currentColors = getColors();
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme']
+        });
+
         const starChars = ['.', '·', '∗', '✦', '•', '°'];
         let stars: Star[] = [];
 
@@ -75,7 +85,7 @@ export const StarfieldWidget: React.FC<StarfieldWidgetProps> = ({ speed = 50 }) 
         const render = () => {
             animationId = requestAnimationFrame(render);
 
-            const colors = getColors();
+            const colors = currentColors;
             const spd = speed * 0.15;
 
             // Full clear — no burn-in
@@ -146,7 +156,7 @@ export const StarfieldWidget: React.FC<StarfieldWidgetProps> = ({ speed = 50 }) 
         };
 
         // Initial clear
-        ctx.fillStyle = getColors().bg;
+        ctx.fillStyle = currentColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         animationId = requestAnimationFrame(render);
@@ -154,6 +164,7 @@ export const StarfieldWidget: React.FC<StarfieldWidgetProps> = ({ speed = 50 }) 
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            observer.disconnect();
         };
     }, [speed]);
 
