@@ -25,6 +25,7 @@ interface SettingsProps {
     onResetLayout: () => void;
     activeWidgets: Record<string, boolean>;
     onToggleWidget: (key: string) => void;
+    onAddWidget: (type: string) => void;
 
 
     showWidgetTitles: boolean;
@@ -89,6 +90,7 @@ export const Settings: React.FC<SettingsProps> = ({
     onResetLayout,
     activeWidgets = {},
     onToggleWidget,
+    onAddWidget,
     showWidgetTitles,
     onToggleWidgetTitles,
     customFont,
@@ -129,6 +131,9 @@ export const Settings: React.FC<SettingsProps> = ({
     const [newCatName, setNewCatName] = useState('');
     const [newLinkInputs, setNewLinkInputs] = useState<Record<string, { label: string, url: string }>>({});
     const [newPresetName, setNewPresetName] = useState('');
+
+    // Widget duplication modal state
+    const [widgetToDuplicate, setWidgetToDuplicate] = useState<string | null>(null);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
@@ -262,6 +267,34 @@ export const Settings: React.FC<SettingsProps> = ({
                     ( settings )
                 </div>
             </div>
+
+            {/* Confirmation Modal for Widget Duplication */}
+            {widgetToDuplicate && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 pointer-events-auto">
+                    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] p-4 shadow-2xl flex flex-col gap-4 max-w-sm">
+                         <div className="text-[var(--color-fg)] font-bold text-center">
+                            Add another '{widgetToDuplicate}'?
+                        </div>
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={() => {
+                                    onAddWidget(widgetToDuplicate);
+                                    setWidgetToDuplicate(null);
+                                }}
+                                className="px-4 py-1 border border-[var(--color-border)] text-[var(--color-accent)] hover:bg-[var(--color-hover)] no-radius"
+                            >
+                                [ YES ]
+                            </button>
+                            <button
+                                onClick={() => setWidgetToDuplicate(null)}
+                                className="px-4 py-1 border border-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-hover)] no-radius"
+                            >
+                                [ NO ]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* TUI Window Modal */}
             {isModalOpen && (
@@ -406,21 +439,40 @@ export const Settings: React.FC<SettingsProps> = ({
                                     <div>
                                         <h3 className="text-[var(--color-accent)] font-bold mb-4 border-b border-[var(--color-border)] pb-2">Visual / Extras</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {FunWidgets.map(w => (
-                                                <WidgetToggle
-                                                    key={w}
-                                                    id={w}
-                                                    label={w}
-                                                    isActive={!!activeWidgets[w]}
-                                                    onToggle={onToggleWidget}
-                                                />
-                                            ))}
+                                            {FunWidgets.flatMap(w => {
+                                                // Find all instances of this widget type (e.g. "snake" and "snake-123456")
+                                                const instances = Object.keys(activeWidgets).filter(
+                                                    key => key === w || key.startsWith(`${w}-`)
+                                                );
+                                                // If no instances, show the base one as inactive
+                                                if (instances.length === 0) instances.push(w);
+
+                                                return instances.sort().map(key => {
+                                                    const isBase = key === w;
+                                                    const displayLabel = isBase ? w : `${w} (extra)`;
+                                                    return (
+                                                        <WidgetToggle
+                                                            key={key}
+                                                            id={key}
+                                                            label={displayLabel}
+                                                            isActive={!!activeWidgets[key]}
+                                                            onToggle={onToggleWidget}
+                                                            onDoubleClick={() => setWidgetToDuplicate(w)}
+                                                        />
+                                                    );
+                                                });
+                                            })}
                                         </div>
                                     </div>
 
-                                    <p className="text-[var(--color-muted)] text-xs mt-4">
-                                        Note: Toggling widgets may reset their position to the bottom of the grid.
-                                    </p>
+                                    <div className="flex flex-col gap-1 mt-4">
+                                        <p className="text-[var(--color-muted)] text-xs">
+                                            Note: Toggling widgets may reset their position to the bottom of the grid.
+                                        </p>
+                                        <p className="text-[var(--color-accent)] text-xs font-bold">
+                                            Tip: Double-click to add duplicate widgets.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 

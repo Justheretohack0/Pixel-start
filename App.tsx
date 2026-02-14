@@ -282,6 +282,12 @@ export default function App() {
   };
 
   const toggleWidget = (key: string) => {
+    // If it's an extra widget (contains '-'), we simply remove it when toggled off
+    if (key.includes('-') && activeWidgets[key]) {
+      removeExtraWidget(key);
+      return;
+    }
+
     const willBeActive = !activeWidgets[key];
     setActiveWidgets(prev => ({
       ...prev,
@@ -310,6 +316,50 @@ export default function App() {
     }
   };
 
+  const addExtraWidget = (type: string) => {
+    const key = `${type}-${Date.now()}`;
+    setActiveWidgets(prev => ({
+      ...prev,
+      [key]: true
+    }));
+
+    setLayouts(prev => {
+      const nextLayouts = { ...prev } as Layouts;
+      Object.keys(nextLayouts).forEach(bp => {
+        const currentList = nextLayouts[bp] || [];
+        let maxY = 0;
+        currentList.forEach((item: any) => {
+          maxY = Math.max(maxY, item.y + item.h);
+        });
+
+        nextLayouts[bp] = [
+          ...currentList,
+          { i: key, x: 0, y: maxY, w: 2, h: 4, minW: 1, minH: 2 }
+        ];
+      });
+      return nextLayouts;
+    });
+  };
+
+  const removeExtraWidget = (key: string) => {
+    // Remove from active widgets
+    setActiveWidgets(prev => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+    });
+
+    // Remove from layouts
+    setLayouts(prev => {
+        const nextLayouts = { ...prev } as Layouts;
+        Object.keys(nextLayouts).forEach(bp => {
+            if (nextLayouts[bp]) {
+                nextLayouts[bp] = nextLayouts[bp].filter(item => item.i !== key);
+            }
+        });
+        return nextLayouts;
+    });
+  };
 
   const handleSavePreset = (name: string) => {
     const newPreset = {
@@ -415,6 +465,7 @@ export default function App() {
         onResetLayout={resetLayout}
         activeWidgets={activeWidgets}
         onToggleWidget={toggleWidget}
+        onAddWidget={addExtraWidget}
         showWidgetTitles={showWidgetTitles}
         onToggleWidgetTitles={() => setShowWidgetTitles(!showWidgetTitles)}
         customFont={customFont}
@@ -460,96 +511,66 @@ export default function App() {
             <div key="settings-guard" className="settings-guard-item pointer-events-none" />
           )}
 
-          {activeWidgets['search'] && (
-            <TuiBox key="search" title="web_search" showTitle={showWidgetTitles}>
-              <SearchWidget />
-            </TuiBox>
-          )}
+          {Object.keys(activeWidgets).map(key => {
+            if (!activeWidgets[key]) return null;
+            const isExtra = key.includes('-');
+            const type = isExtra ? key.split('-')[0] : key;
 
-          {activeWidgets['datetime'] && (
-            <TuiBox key="datetime" title="datetime" showTitle={showWidgetTitles}>
-              <DateTimeWidget />
-            </TuiBox>
-          )}
+            // Common props
+            const boxProps = {
+                key: key,
+                title: isExtra ? `${type}.exe (${key.split('-')[1].slice(-4)})` : (
+                    ['snake', 'life', 'fireworks', 'starfield', 'rain', 'maze', 'pipes', 'matrix', 'donut'].includes(type)
+                        ? (type === 'life' ? 'conway.life' :
+                           type === 'donut' ? 'donut.c' :
+                           type === 'pipes' ? 'pipes.scr' :
+                           type === 'matrix' ? 'matrix' :
+                           type === 'snake' ? 'snake.exe' :
+                           type === 'fireworks' ? 'fireworks.py' :
+                           type === 'starfield' ? 'starfield.scr' :
+                           type === 'rain' ? 'rain.sh' :
+                           type === 'maze' ? 'maze.gen' : type)
+                        : (type === 'todo' ? 'todo-list' : type === 'search' ? 'web_search' : type)
+                ),
+                showTitle: showWidgetTitles,
+                onClose: isExtra ? () => removeExtraWidget(key) : undefined
+            };
 
-          {activeWidgets['stats'] && (
-            <TuiBox key="stats" title="stats" showTitle={showWidgetTitles}>
-              <StatsWidget mode={statsMode} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['weather'] && (
-            <TuiBox key="weather" title="weather" showTitle={showWidgetTitles}>
-              <WeatherWidget mode={weatherMode} unit={tempUnit} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['todo'] && (
-            <TuiBox key="todo" title="todo-list" showTitle={showWidgetTitles}>
-              <TodoWidget tasks={todos} setTasks={setTodos} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['links'] && (
-            <TuiBox key="links" title="links" showTitle={showWidgetTitles}>
-              <LinksWidget groups={linkGroups} openInNewTab={openInNewTab} />
-            </TuiBox>
-          )}
-
-
-          {activeWidgets['donut'] && (
-            <TuiBox key="donut" title="donut.c" showTitle={showWidgetTitles}>
-              <DonutWidget speed={funOptions.donut.speed} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['matrix'] && (
-            <TuiBox key="matrix" title="matrix" showTitle={showWidgetTitles}>
-              <MatrixWidget options={funOptions.matrix} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['pipes'] && (
-            <TuiBox key="pipes" title="pipes.scr" showTitle={showWidgetTitles}>
-              <PipesWidget options={funOptions.pipes} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['snake'] && (
-            <TuiBox key="snake" title="snake.exe" showTitle={showWidgetTitles}>
-              <SnakeWidget speed={funOptions.snake.speed} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['life'] && (
-            <TuiBox key="life" title="conway.life" showTitle={showWidgetTitles}>
-              <GameOfLifeWidget speed={funOptions.life.speed} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['fireworks'] && (
-            <TuiBox key="fireworks" title="fireworks.py" showTitle={showWidgetTitles}>
-              <FireworksWidget speed={funOptions.fireworks.speed} explosionSize={funOptions.fireworks.explosionSize} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['starfield'] && (
-            <TuiBox key="starfield" title="starfield.scr" showTitle={showWidgetTitles}>
-              <StarfieldWidget speed={funOptions.starfield.speed} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['rain'] && (
-            <TuiBox key="rain" title="rain.sh" showTitle={showWidgetTitles}>
-              <RainWidget speed={funOptions.rain.speed} />
-            </TuiBox>
-          )}
-
-          {activeWidgets['maze'] && (
-            <TuiBox key="maze" title="maze.gen" showTitle={showWidgetTitles}>
-              <MazeWidget speed={funOptions.maze.speed} />
-            </TuiBox>
-          )}
+            switch (type) {
+                case 'search':
+                    return <TuiBox {...boxProps} title="web_search"><SearchWidget /></TuiBox>;
+                case 'datetime':
+                    return <TuiBox {...boxProps} title="datetime"><DateTimeWidget /></TuiBox>;
+                case 'stats':
+                    return <TuiBox {...boxProps} title="stats"><StatsWidget mode={statsMode} /></TuiBox>;
+                case 'weather':
+                    return <TuiBox {...boxProps} title="weather"><WeatherWidget mode={weatherMode} unit={tempUnit} /></TuiBox>;
+                case 'todo':
+                    return <TuiBox {...boxProps} title="todo-list"><TodoWidget tasks={todos} setTasks={setTodos} /></TuiBox>;
+                case 'links':
+                    return <TuiBox {...boxProps} title="links"><LinksWidget groups={linkGroups} openInNewTab={openInNewTab} /></TuiBox>;
+                case 'donut':
+                    return <TuiBox {...boxProps}><DonutWidget speed={funOptions.donut.speed} /></TuiBox>;
+                case 'matrix':
+                    return <TuiBox {...boxProps}><MatrixWidget options={funOptions.matrix} /></TuiBox>;
+                case 'pipes':
+                    return <TuiBox {...boxProps}><PipesWidget options={funOptions.pipes} /></TuiBox>;
+                case 'snake':
+                    return <TuiBox {...boxProps}><SnakeWidget speed={funOptions.snake.speed} /></TuiBox>;
+                case 'life':
+                    return <TuiBox {...boxProps}><GameOfLifeWidget speed={funOptions.life.speed} /></TuiBox>;
+                case 'fireworks':
+                    return <TuiBox {...boxProps}><FireworksWidget speed={funOptions.fireworks.speed} explosionSize={funOptions.fireworks.explosionSize} /></TuiBox>;
+                case 'starfield':
+                    return <TuiBox {...boxProps}><StarfieldWidget speed={funOptions.starfield.speed} /></TuiBox>;
+                case 'rain':
+                    return <TuiBox {...boxProps}><RainWidget speed={funOptions.rain.speed} /></TuiBox>;
+                case 'maze':
+                    return <TuiBox {...boxProps}><MazeWidget speed={funOptions.maze.speed} /></TuiBox>;
+                default:
+                    return null;
+            }
+          })}
 
         </ResponsiveGridLayout>
       </div>
