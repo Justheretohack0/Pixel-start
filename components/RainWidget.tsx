@@ -46,6 +46,15 @@ export const RainWidget: React.FC<RainWidgetProps> = ({ speed = 50 }) => {
             };
         };
 
+        let colors = getColors();
+        const observer = new MutationObserver(() => {
+            colors = getColors();
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme']
+        });
+
         const dropChars = ['│', '┃', '|', '¦'];
         const splashChars = ['·', '.', '∙', '˙', '°'];
         let drops: Drop[] = [];
@@ -82,8 +91,6 @@ export const RainWidget: React.FC<RainWidgetProps> = ({ speed = 50 }) => {
             const interval = Math.max(16, 50 - speed * 0.4);
             if (timestamp - lastTime < interval) return;
             lastTime = timestamp;
-
-            const colors = getColors();
 
             // Clear
             ctx.fillStyle = colors.bg;
@@ -140,7 +147,7 @@ export const RainWidget: React.FC<RainWidgetProps> = ({ speed = 50 }) => {
             });
         };
 
-        ctx.fillStyle = getColors().bg;
+        ctx.fillStyle = colors.bg;
         ctx.fillRect(0, 0, width, height);
 
         animationId = requestAnimationFrame(render);
@@ -148,6 +155,7 @@ export const RainWidget: React.FC<RainWidgetProps> = ({ speed = 50 }) => {
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            observer.disconnect();
         };
     }, [speed]);
 
