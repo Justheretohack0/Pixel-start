@@ -67,19 +67,25 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ mode = 'standard',
 
     const fetchWeather = async (lat: number, lon: number, defaultCity?: string) => {
       try {
-        let city = defaultCity || "Unknown";
-        if (!defaultCity) {
-          try {
-            const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-            const geoData = await geoRes.json();
-            if (geoData.city) city = geoData.city;
-            else if (geoData.locality) city = geoData.locality;
-          } catch (e) { /* ignore */ }
-        }
+        // Parallelize requests
+        const geoPromise = (async () => {
+          let resolvedCity = defaultCity || "Unknown";
+          if (!defaultCity) {
+            try {
+              const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+              const geoData = await geoRes.json();
+              if (geoData.city) resolvedCity = geoData.city;
+              else if (geoData.locality) resolvedCity = geoData.locality;
+            } catch (e) { /* ignore */ }
+          }
+          return resolvedCity;
+        })();
 
-        const response = await fetch(
+        const weatherPromise = fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,visibility&hourly=temperature_2m,weather_code,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`
         );
+
+        const [city, response] = await Promise.all([geoPromise, weatherPromise]);
 
         if (!response.ok) throw new Error('API Error');
 
