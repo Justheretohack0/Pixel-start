@@ -10,6 +10,11 @@ export const hexToHsv = (hex: string): { h: number, s: number, v: number } => {
         g = parseInt(hex.substring(2, 4), 16);
         b = parseInt(hex.substring(4, 6), 16);
     }
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+        return { h: 0, s: 0, v: 0 };
+    }
+
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h = 0, s = 0, v = max;

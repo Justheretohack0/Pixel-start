@@ -45,3 +45,29 @@ test('hexToHsv converts a random color correctly', () => {
     assert.strictEqual(Math.round(result.s), 0);
     assert.strictEqual(Math.round(result.v * 10) / 10, 50.2); // 128/255 * 100 = 50.196...
 });
+
+test('hexToHsv handles invalid hex characters gracefully', () => {
+    const result1 = hexToHsv('#ZZZZZZ');
+    assert.deepStrictEqual(result1, { h: 0, s: 0, v: 0 });
+
+    const result2 = hexToHsv('#GHIJKL');
+    assert.deepStrictEqual(result2, { h: 0, s: 0, v: 0 });
+});
+
+test('hexToHsv handles invalid lengths gracefully', () => {
+    const result1 = hexToHsv('#12');
+    assert.deepStrictEqual(result1, { h: 0, s: 0, v: 0 });
+
+    const result2 = hexToHsv('#12345');
+    assert.deepStrictEqual(result2, { h: 0, s: 0, v: 0 });
+});
+
+test('hexToHsv handles empty string gracefully', () => {
+    const result = hexToHsv('');
+    assert.deepStrictEqual(result, { h: 0, s: 0, v: 0 });
+});
+
+test('hexToHsv handles partial invalid input gracefully', () => {
+    const result = hexToHsv('#00GG00');
+    assert.deepStrictEqual(result, { h: 0, s: 0, v: 0 });
+});
