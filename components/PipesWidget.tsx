@@ -88,7 +88,21 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
             ].filter(Boolean);
         };
 
+        const getBgColor = () => getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
+
         let currentColors = getThemeColors();
+        let currentBgColor = getBgColor();
+
+        // Update colors when theme changes
+        const themeObserver = new MutationObserver(() => {
+            currentColors = getThemeColors();
+            currentBgColor = getBgColor();
+        });
+
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class', 'data-theme']
+        });
 
         const initPipe = (): Pipe => ({
             x: Math.floor(Math.random() * cols),
@@ -113,8 +127,7 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
             cols = Math.floor(width / colWidth);
             rows = Math.floor(height / rowHeight);
             // Clear and re-init
-            const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-            ctx.fillStyle = bg;
+            ctx.fillStyle = currentBgColor;
             ctx.fillRect(0, 0, width, height);
             pipes.length = 0;
             steps.length = 0;
@@ -137,12 +150,10 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
             if (timestamp - lastTime < interval) return;
             lastTime = timestamp;
 
-            const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-
             // Periodic full fade to prevent clutter buildup
             fadeTimer++;
             if (fadeTimer % 3 === 0) {
-                ctx.fillStyle = bgColor;
+                ctx.fillStyle = currentBgColor;
                 ctx.globalAlpha = fade;
                 ctx.fillRect(0, 0, width, height);
                 ctx.globalAlpha = 1.0;
@@ -150,9 +161,6 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
 
             ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
             ctx.textBaseline = 'top';
-
-            // Refresh colors occasionally
-            if (Math.random() < 0.02) currentColors = getThemeColors();
 
             pipes.forEach((p, index) => {
                 // Decide: straight or turn
@@ -193,8 +201,7 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
         };
 
         // Initial clear
-        const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-        ctx.fillStyle = bg;
+        ctx.fillStyle = currentBgColor;
         ctx.fillRect(0, 0, width, height);
 
         animationId = requestAnimationFrame(render);
@@ -202,6 +209,7 @@ export const PipesWidget: React.FC<PipesWidgetProps> = ({ options, speed = 50 })
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
+            themeObserver.disconnect();
         };
     }, [activeSpeed, fade, pipeCount, fontSize, lifetime]);
 
