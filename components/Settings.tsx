@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { THEMES } from '../constants';
 import { LinkGroup } from '../types';
 import { AsciiSlider } from './AsciiSlider';
+import { WidgetToggle } from './WidgetToggle';
 
 interface SettingsProps {
     currentTheme: string;
