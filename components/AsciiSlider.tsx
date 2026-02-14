@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { calculateSliderValue, calculateStepChange } from '../utils/sliderUtils';
 
 interface AsciiSliderProps {
     label: string;
@@ -19,11 +20,7 @@ export const AsciiSlider: React.FC<AsciiSliderProps> = ({ label, value, min, max
         const track = sliderRef.current?.querySelector('[data-track]') as HTMLDivElement;
         if (!track) return value;
         const rect = track.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const pct = Math.max(0, Math.min(1, x / rect.width));
-        const raw = min + pct * (max - min);
-        const snapped = Math.round(raw / step) * step;
-        return Math.max(min, Math.min(max, snapped));
+        return calculateSliderValue(clientX, rect.left, rect.width, min, max, step);
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -49,15 +46,15 @@ export const AsciiSlider: React.FC<AsciiSliderProps> = ({ label, value, min, max
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        let newVal = value;
-        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-            newVal = Math.min(max, value + step);
-            e.preventDefault();
-        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-            newVal = Math.max(min, value - step);
+        const newVal = calculateStepChange(value, step, min, max, e.key);
+
+        if (['ArrowRight', 'ArrowUp', 'ArrowLeft', 'ArrowDown'].includes(e.key)) {
             e.preventDefault();
         }
-        if (newVal !== value) onChange(newVal);
+
+        if (newVal !== value) {
+            onChange(newVal);
+        }
     };
 
     return (
