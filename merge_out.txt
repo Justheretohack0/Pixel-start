@@ -1,0 +1,5 @@
+Auto-merging README.md
+CONFLICT (add/add): Merge conflict in README.md
+Auto-merging index.html
+CONFLICT (add/add): Merge conflict in index.html
+Automatic merge failed; fix conflicts and then commit the result.
