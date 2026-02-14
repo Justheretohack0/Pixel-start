@@ -27,7 +27,14 @@ def create_source_zip(output_filename):
             dir_path = os.path.join(base_dir, d)
             if os.path.exists(dir_path):
                 for root, dirs, files in os.walk(dir_path):
+                    # Exclude hidden directories
+                    dirs[:] = [d for d in dirs if d not in ['.git', '__pycache__', '.idea', '.vscode', 'node_modules']]
+
                     for file in files:
+                        # Exclude build artifacts and system files
+                        if file.endswith(('.xpi', '.zip', '.DS_Store')):
+                            continue
+
                         full_path = os.path.join(root, file)
                         rel_path = os.path.relpath(full_path, base_dir)
                         # CRITICAL: Force forward slashes for Linux/AMO compatibility
