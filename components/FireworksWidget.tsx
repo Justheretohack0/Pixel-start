@@ -41,7 +41,7 @@ export const FireworksWidget: React.FC<FireworksWidgetProps> = ({ speed = 50, ex
         canvas.width = width;
         canvas.height = height;
 
-        let currentColors: { bg: string; fg: string; accent: string; muted: string };
+        let currentColors: { bg: string; fg: string; accent: string; muted: string } = { bg: '#000000', fg: '#ffffff', accent: '#00ff00', muted: '#888888' };
         const updateColors = () => {
             const root = getComputedStyle(document.documentElement);
             currentColors = {
