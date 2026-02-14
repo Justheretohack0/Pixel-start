@@ -1,5 +1,6 @@
 import React from 'react';
 import { LinkGroup } from '../types';
+import { sanitizeUrl } from '../utils/urlUtils';
 
 interface LinksWidgetProps {
     groups: LinkGroup[];
@@ -20,7 +21,7 @@ export const LinksWidget: React.FC<LinksWidgetProps> = ({ groups, openInNewTab =
                     {group.links.map(link => (
                         <a
                             key={`${link.label}-${link.url}`}
-                            href={link.url}
+                            href={sanitizeUrl(link.url)}
                             target={openInNewTab ? "_blank" : "_self"}
                             rel="noopener noreferrer"
                             className="text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:text-shadow-glow transition-all duration-[20ms] text-sm truncate block"
