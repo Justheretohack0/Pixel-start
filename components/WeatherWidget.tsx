@@ -1,189 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { WeatherIcon } from './WeatherIcons';
-// Import utility for consistent weather condition text
-import { convertTemp, TempUnit, getWeatherCondition } from '../utils/weatherUtils';
+import { convertTemp, TempUnit } from '../utils/weatherUtils';
+import { useWeather } from '../hooks/useWeather';
 
 interface WeatherWidgetProps {
   mode?: 'standard' | 'icon';
   unit?: TempUnit;
 }
 
-interface WeatherData {
-  locationName?: string;
-  current: {
-    temp: number;
-    condition: string;
-    weatherCode: number;
-    humidity: number;
-    windSpeed: number;
-    feelsLike: number;
-    precipProb: number;
-    precipAmt: number;
-    visKm: number;
-    isDay: number; // 1 for day, 0 for night
-  };
-  forecast: {
-    time: string;
-    temp: number;
-    condition: string;
-    weatherCode?: number;
-    isDay?: number;
-  }[];
-}
-
 export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ mode = 'standard', unit = 'C' }) => {
-  const [data, setData] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useWeather();
 
   // Responsive Logic for Standard Mode
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleForecastCount, setVisibleForecastCount] = useState(2);
-
-  useEffect(() => {
-    // 1. Try to load from cache
-    const cached = localStorage.getItem('tui-weather-cache');
-    let hasCache = false;
-
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed) {
-          setData(parsed);
-          setLoading(false);
-          hasCache = true;
-        }
-      } catch (e) {
-        console.error("Weather cache parse error", e);
-      }
-    }
-
-    if (!navigator.geolocation) {
-      if (!hasCache) {
-        setError("no geo support");
-        setLoading(false);
-      }
-      return;
-    }
-
-    const fetchWeather = async (lat: number, lon: number, defaultCity?: string) => {
-      try {
-        // Parallelize requests
-        const geoPromise = (async () => {
-          let resolvedCity = defaultCity || "Unknown";
-          if (!defaultCity) {
-            try {
-              const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-              const geoData = await geoRes.json();
-              if (geoData.city) resolvedCity = geoData.city;
-              else if (geoData.locality) resolvedCity = geoData.locality;
-            } catch (e) { /* ignore */ }
-          }
-          return resolvedCity;
-        })();
-
-        const weatherPromise = fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,visibility&hourly=temperature_2m,weather_code,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`
-        );
-
-        const [city, response] = await Promise.all([geoPromise, weatherPromise]);
-
-        if (!response.ok) throw new Error('API Error');
-
-        const result = await response.json();
-
-        // Get current hour index based on local time
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hour = String(now.getHours()).padStart(2, '0');
-        const currentHourIso = `${year}-${month}-${day}T${hour}`;
-
-        let hourIndex = 0;
-        const resultTimeIndex = result.hourly.time.findIndex((t: string) => t.startsWith(currentHourIso));
-        if (resultTimeIndex !== -1) hourIndex = resultTimeIndex;
-
-        // Parse Current
-        const currentData = {
-          temp: Math.round(result.current.temperature_2m),
-          condition: getWeatherCondition(result.current.weather_code, result.current.is_day),
-          weatherCode: result.current.weather_code,
-          humidity: result.current.relative_humidity_2m,
-          windSpeed: Math.round(result.current.wind_speed_10m),
-          feelsLike: Math.round(result.current.apparent_temperature),
-          precipProb: result.hourly.precipitation_probability[hourIndex] || 0,
-          precipAmt: result.current.precipitation,
-          visKm: (result.current.visibility || 0) / 1000,
-          isDay: result.current.is_day
-        };
-
-        // Standard Forecast - Get next 3 hours
-        const nextHours = result.hourly.time.slice(hourIndex + 1, hourIndex + 4);
-
-        const standardForecast = nextHours.map((_: string, i: number) => {
-          const actualIndex = hourIndex + 1 + i;
-          const safeIndex = Math.min(actualIndex, result.hourly.temperature_2m.length - 1);
-
-          const dateObj = new Date(result.hourly.time[safeIndex]);
-          const hours = dateObj.getHours();
-          const ampm = hours >= 12 ? 'pm' : 'am';
-          const hours12 = hours % 12 || 12;
-          const displayTime = `${hours12} ${ampm}`;
-          const isDayForecast = (hours >= 6 && hours < 20) ? 1 : 0; // Rough estimate
-
-          return {
-            time: displayTime.padStart(5, ' '),
-            temp: Math.round(result.hourly.temperature_2m[safeIndex]),
-            condition: getWeatherCondition(result.hourly.weather_code[safeIndex], isDayForecast),
-            weatherCode: result.hourly.weather_code[safeIndex],
-            isDay: isDayForecast
-          };
-        });
-
-        const newData = {
-          locationName: city,
-          current: currentData,
-          forecast: standardForecast
-        };
-
-        setData(newData);
-        setLoading(false);
-        setError(null);
-
-        // Update Cache
-        localStorage.setItem('tui-weather-cache', JSON.stringify(newData));
-
-      } catch (err) {
-        console.error(err);
-        if (!hasCache) {
-          setError("fetch failed");
-          setLoading(false);
-        }
-      }
-    };
-
-    // Delay fetch if we have cache, otherwise fetch immediately
-    const delay = hasCache ? 1000 : 0;
-
-    const timer = setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchWeather(position.coords.latitude, position.coords.longitude);
-        },
-        (err: any) => {
-          console.error("Geolocation Error:", err);
-          if (!hasCache) {
-            setError(err.message || "loc error");
-            setLoading(false);
-          }
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-      );
-    }, delay);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // Resize Observer for Standard Mode
   useEffect(() => {

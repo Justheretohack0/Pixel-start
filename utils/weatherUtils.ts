@@ -30,3 +30,87 @@ export const getWeatherCondition = (code: number, isDay: number = 1): string => 
   if (code === 96 || code === 99) return 'Thunderstorm with Hail';
   return 'Unknown';
 };
+
+export interface WeatherData {
+  locationName?: string;
+  current: {
+    temp: number;
+    condition: string;
+    weatherCode: number;
+    humidity: number;
+    windSpeed: number;
+    feelsLike: number;
+    precipProb: number;
+    precipAmt: number;
+    visKm: number;
+    isDay: number; // 1 for day, 0 for night
+  };
+  forecast: {
+    time: string;
+    temp: number;
+    condition: string;
+    weatherCode?: number;
+    isDay?: number;
+  }[];
+}
+
+export const processWeatherData = (city: string, result: any, now: Date = new Date()): WeatherData => {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const currentHourIso = `${year}-${month}-${day}T${hour}`;
+
+  let hourIndex = 0;
+  // Check if result.hourly.time exists and is an array
+  if (result.hourly && Array.isArray(result.hourly.time)) {
+    const resultTimeIndex = result.hourly.time.findIndex((t: string) => t.startsWith(currentHourIso));
+    if (resultTimeIndex !== -1) hourIndex = resultTimeIndex;
+  }
+
+  // Parse Current
+  const currentData = {
+    temp: Math.round(result.current.temperature_2m),
+    condition: getWeatherCondition(result.current.weather_code, result.current.is_day),
+    weatherCode: result.current.weather_code,
+    humidity: result.current.relative_humidity_2m,
+    windSpeed: Math.round(result.current.wind_speed_10m),
+    feelsLike: Math.round(result.current.apparent_temperature),
+    precipProb: result.hourly?.precipitation_probability ? (result.hourly.precipitation_probability[hourIndex] || 0) : 0,
+    precipAmt: result.current.precipitation,
+    visKm: (result.current.visibility || 0) / 1000,
+    isDay: result.current.is_day
+  };
+
+  // Standard Forecast - Get next 3 hours
+  let standardForecast: WeatherData['forecast'] = [];
+  if (result.hourly && result.hourly.time) {
+    const nextHours = result.hourly.time.slice(hourIndex + 1, hourIndex + 4);
+
+    standardForecast = nextHours.map((_: string, i: number) => {
+      const actualIndex = hourIndex + 1 + i;
+      const safeIndex = Math.min(actualIndex, result.hourly.temperature_2m.length - 1);
+
+      const dateObj = new Date(result.hourly.time[safeIndex]);
+      const hours = dateObj.getHours();
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      const hours12 = hours % 12 || 12;
+      const displayTime = `${hours12} ${ampm}`;
+      const isDayForecast = (hours >= 6 && hours < 20) ? 1 : 0; // Rough estimate
+
+      return {
+        time: displayTime.padStart(5, ' '),
+        temp: Math.round(result.hourly.temperature_2m[safeIndex]),
+        condition: getWeatherCondition(result.hourly.weather_code[safeIndex], isDayForecast),
+        weatherCode: result.hourly.weather_code[safeIndex],
+        isDay: isDayForecast
+      };
+    });
+  }
+
+  return {
+    locationName: city,
+    current: currentData,
+    forecast: standardForecast
+  };
+};

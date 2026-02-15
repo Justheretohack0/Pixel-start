@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { getWeatherCondition, convertTemp } from '../utils/weatherUtils.ts';
+import { getWeatherCondition, convertTemp, processWeatherData } from '../utils/weatherUtils.ts';
 
 describe('convertTemp', () => {
   it('should return Fahrenheit value as is when unit is F', () => {
@@ -108,5 +108,77 @@ describe('getWeatherCondition', () => {
   it('should handle missing isDay argument (default to 1)', () => {
      assert.strictEqual(getWeatherCondition(0), 'Sunny');
      assert.strictEqual(getWeatherCondition(1), 'Mainly Sunny');
+  });
+});
+
+describe('processWeatherData', () => {
+  it('parses weather data correctly', () => {
+      // Mock current time: 2023-10-27T10:00:00
+      const mockNow = new Date('2023-10-27T10:00:00');
+
+      const mockCity = "Test City";
+      const mockResult = {
+          current: {
+              temperature_2m: 20.5,
+              weather_code: 0,
+              is_day: 1,
+              relative_humidity_2m: 50,
+              wind_speed_10m: 10,
+              apparent_temperature: 19,
+              precipitation: 0,
+              visibility: 10000
+          },
+          hourly: {
+              time: [
+                  '2023-10-27T10:00',
+                  '2023-10-27T11:00',
+                  '2023-10-27T12:00',
+                  '2023-10-27T13:00',
+                  '2023-10-27T14:00'
+              ],
+              temperature_2m: [20, 21, 22, 21, 20],
+              weather_code: [0, 1, 2, 3, 0],
+              precipitation_probability: [0, 10, 20, 0, 0]
+          }
+      };
+
+      const data = processWeatherData(mockCity, mockResult, mockNow);
+
+      assert.strictEqual(data.locationName, "Test City");
+      assert.strictEqual(data.current.temp, 21); // 20.5 rounded
+      assert.strictEqual(data.current.condition, 'Sunny');
+      assert.strictEqual(data.current.precipProb, 0); // Hour index 0
+
+      assert.strictEqual(data.forecast.length, 3);
+
+      // Forecast 1: 11:00 (Index 1)
+      assert.strictEqual(data.forecast[0].temp, 21);
+      assert.strictEqual(data.forecast[0].time.trim(), '11 am');
+
+      // Forecast 2: 12:00 (Index 2)
+      assert.strictEqual(data.forecast[1].temp, 22);
+      assert.strictEqual(data.forecast[1].time.trim(), '12 pm');
+  });
+
+  it('handles missing hourly data gracefully', () => {
+      const mockNow = new Date();
+      const mockCity = "Test City";
+      const mockResult = {
+          current: {
+              temperature_2m: 20.5,
+              weather_code: 0,
+              is_day: 1,
+              relative_humidity_2m: 50,
+              wind_speed_10m: 10,
+              apparent_temperature: 19,
+              precipitation: 0,
+              visibility: 10000
+          },
+          hourly: {}
+      };
+
+      const data = processWeatherData(mockCity, mockResult, mockNow);
+      assert.strictEqual(data.current.temp, 21);
+      assert.deepStrictEqual(data.forecast, []);
   });
 });
