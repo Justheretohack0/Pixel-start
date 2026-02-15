@@ -1,118 +1,33 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { THEMES } from '../constants';
-import { LinkGroup } from '../types';
 import { AsciiSlider } from './AsciiSlider';
 import { WidgetToggle } from './WidgetToggle';
-
-interface SettingsProps {
-    currentTheme: string;
-    onThemeChange: (themeName: string) => void;
-    linkGroups: LinkGroup[];
-    onUpdateLinks: (groups: LinkGroup[]) => void;
-    customCss: string;
-    onCustomCssChange: (css: string) => void;
-    statsMode: 'text' | 'graph' | 'detailed' | 'minimal';
-    onStatsModeChange: (mode: 'text' | 'graph' | 'detailed' | 'minimal') => void;
-    weatherMode: 'standard' | 'icon';
-    onWeatherModeChange: (mode: 'standard' | 'icon') => void;
-    tempUnit: 'C' | 'F';
-    onTempUnitChange: (unit: 'C' | 'F') => void;
-    isLayoutLocked: boolean;
-    onToggleLayoutLock: () => void;
-    isResizingEnabled: boolean;
-    onToggleResizing: () => void;
-    onResetLayout: () => void;
-    activeWidgets: Record<string, boolean>;
-    onToggleWidget: (key: string) => void;
-    onAddWidget: (type: string) => void;
-
-
-    showWidgetTitles: boolean;
-    onToggleWidgetTitles: () => void;
-    customFont: string;
-    onCustomFontChange: (font: string) => void;
-    reserveSettingsSpace: boolean;
-    onToggleReserveSettings: () => void;
-    funOptions: {
-        matrix: { speed: number; fade: number; charSet: 'numbers' | 'latin' | 'mixed'; charFlux: number; glow: boolean; fontSize: number };
-        pipes: { speed: number; fade: number; count: number; fontSize: number; lifetime: number };
-        donut: { speed: number };
-        snake: { speed: number };
-        life: { speed: number };
-        fireworks: { speed: number; explosionSize: number };
-        starfield: { speed: number };
-        rain: { speed: number };
-        maze: { speed: number };
-    };
-    onFunOptionsChange: (options: any) => void;
-
-
-    presets: any[];
-    onSavePreset: (name: string) => void;
-    onLoadPreset: (preset: any) => void;
-    onDeletePreset: (id: number) => void;
-
-    customThemes?: Record<string, any>;
-    onDeleteCustomTheme?: (name: string) => void;
-    onOpenThemeMaker?: () => void;
-
-
-    widgetRadius?: number;
-    onWidgetRadiusChange?: (value: number) => void;
-
-
-    openInNewTab?: boolean;
-    onToggleOpenInNewTab?: () => void;
-}
+import { useAppContext } from '../contexts/AppContext';
 
 type Tab = 'themes' | 'shortcuts' | 'widgets' | 'advanced' | 'presets';
 
+export const Settings: React.FC = () => {
+    const {
+        currentTheme, setCurrentTheme,
+        customThemes, handleDeleteCustomTheme, setIsThemeMakerOpen,
+        linkGroups, setLinkGroups,
+        customCss, setCustomCss,
+        statsMode, setStatsMode,
+        weatherMode, setWeatherMode,
+        tempUnit, setTempUnit,
+        isLayoutLocked, setIsLayoutLocked,
+        isResizingEnabled, setIsResizingEnabled,
+        resetLayout,
+        activeWidgets, toggleWidget, addExtraWidget,
+        showWidgetTitles, setShowWidgetTitles,
+        customFont, setCustomFont,
+        reserveSettingsSpace, setReserveSettingsSpace,
+        funOptions, setFunOptions,
+        presets, handleSavePreset, handleLoadPreset, handleDeletePreset,
+        widgetRadius, setWidgetRadius,
+        openInNewTab, setOpenInNewTab
+    } = useAppContext();
 
-
-export const Settings: React.FC<SettingsProps> = ({
-    currentTheme,
-    onThemeChange,
-    linkGroups,
-    onUpdateLinks,
-    customCss,
-    onCustomCssChange,
-    statsMode,
-    onStatsModeChange,
-    weatherMode,
-    onWeatherModeChange,
-    tempUnit,
-    onTempUnitChange,
-    isLayoutLocked,
-    onToggleLayoutLock,
-    isResizingEnabled,
-    onToggleResizing,
-    onResetLayout,
-    activeWidgets = {},
-    onToggleWidget,
-    onAddWidget,
-    showWidgetTitles,
-    onToggleWidgetTitles,
-    customFont,
-    onCustomFontChange,
-    reserveSettingsSpace,
-    onToggleReserveSettings,
-
-    customThemes = {},
-    onDeleteCustomTheme,
-    onOpenThemeMaker,
-
-    funOptions,
-    onFunOptionsChange,
-    presets,
-    onSavePreset,
-    onLoadPreset,
-    onDeletePreset,
-    widgetRadius = 4,
-    onWidgetRadiusChange,
-    openInNewTab,
-    onToggleOpenInNewTab,
-}) => {
     const [isButtonVisible, setIsButtonVisible] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<Tab>('themes');
@@ -202,14 +117,14 @@ export const Settings: React.FC<SettingsProps> = ({
 
     const handleAddCategory = () => {
         if (!newCatName.trim()) return;
-        onUpdateLinks([...linkGroups, { category: newCatName, links: [] }]);
+        setLinkGroups([...linkGroups, { category: newCatName, links: [] }]);
         setNewCatName('');
     };
 
     const handleDeleteCategory = (catIndex: number) => {
         const newGroups = [...linkGroups];
         newGroups.splice(catIndex, 1);
-        onUpdateLinks(newGroups);
+        setLinkGroups(newGroups);
     };
 
     const handleAddLink = (catIndex: number) => {
@@ -220,7 +135,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
         const newGroups = [...linkGroups];
         newGroups[catIndex].links.push({ ...input });
-        onUpdateLinks(newGroups);
+        setLinkGroups(newGroups);
 
         setNewLinkInputs({
             ...newLinkInputs,
@@ -231,7 +146,7 @@ export const Settings: React.FC<SettingsProps> = ({
     const handleDeleteLink = (catIndex: number, linkIndex: number) => {
         const newGroups = [...linkGroups];
         newGroups[catIndex].links.splice(linkIndex, 1);
-        onUpdateLinks(newGroups);
+        setLinkGroups(newGroups);
     };
 
     const updateLinkInput = (catName: string, field: 'label' | 'url', value: string) => {
@@ -247,7 +162,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
     const handleSavePresetClick = () => {
         if (!newPresetName.trim()) return;
-        onSavePreset(newPresetName);
+        handleSavePreset(newPresetName);
         setNewPresetName('');
     };
 
@@ -278,7 +193,7 @@ export const Settings: React.FC<SettingsProps> = ({
                         <div className="flex gap-4 justify-center">
                             <button
                                 onClick={() => {
-                                    onAddWidget(widgetToDuplicate);
+                                    addExtraWidget(widgetToDuplicate);
                                     setWidgetToDuplicate(null);
                                 }}
                                 className="px-4 py-1 border border-[var(--color-border)] text-[var(--color-accent)] hover:bg-[var(--color-hover)] no-radius"
@@ -346,7 +261,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
 
                                     <div
-                                        onClick={onOpenThemeMaker}
+                                        onClick={() => setIsThemeMakerOpen(true)}
                                         className="border border-[var(--color-accent)] border-dashed p-2 cursor-pointer hover:bg-[var(--color-hover)] flex flex-col items-center justify-center gap-2 text-center group min-h-[80px]"
                                     >
                                         <span className="text-2xl text-[var(--color-accent)] group-hover:scale-110 transition-transform">+</span>
@@ -357,7 +272,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                     {Object.entries(customThemes).map(([key, theme]: [string, any]) => (
                                         <div
                                             key={key}
-                                            onClick={() => onThemeChange(key)}
+                                            onClick={() => setCurrentTheme(key)}
                                             className={`
                                                 border p-2 cursor-pointer transition-all relative overflow-hidden group min-h-[80px] flex flex-col justify-between
                                                 ${currentTheme === key
@@ -379,7 +294,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onDeleteCustomTheme?.(key);
+                                                    handleDeleteCustomTheme(key);
                                                 }}
                                                 className="absolute top-0 right-0 bg-[var(--color-bg)] border-l border-b border-[var(--color-border)] px-2 py-0.5 cursor-pointer hover:text-[var(--color-accent)] hover:border-[var(--color-accent)] transition-all z-10"
                                                 title="Delete Theme"
@@ -394,7 +309,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                     {Object.keys(THEMES).map(themeKey => (
                                         <div
                                             key={themeKey}
-                                            onClick={() => onThemeChange(themeKey)}
+                                            onClick={() => setCurrentTheme(themeKey)}
                                             className={`
                                                 border p-2 cursor-pointer transition-all relative overflow-hidden group min-h-[80px] flex flex-col justify-between
                                                 ${currentTheme === themeKey
@@ -430,7 +345,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                                     id={w}
                                                     label={w}
                                                     isActive={!!activeWidgets[w]}
-                                                    onToggle={onToggleWidget}
+                                                    onToggle={toggleWidget}
                                                 />
                                             ))}
                                         </div>
@@ -456,7 +371,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                                             id={key}
                                                             label={displayLabel}
                                                             isActive={!!activeWidgets[key]}
-                                                            onToggle={onToggleWidget}
+                                                            onToggle={toggleWidget}
                                                             onDoubleClick={() => setWidgetToDuplicate(w)}
                                                         />
                                                     );
@@ -590,13 +505,13 @@ export const Settings: React.FC<SettingsProps> = ({
                                                     <span className="text-[var(--color-fg)] font-mono">{preset.name}</span>
                                                     <div className="flex gap-3">
                                                         <button
-                                                            onClick={() => onLoadPreset(preset)}
+                                                            onClick={() => handleLoadPreset(preset)}
                                                             className="text-[var(--color-accent)] hover:underline text-xs"
                                                         >
                                                             [ LOAD ]
                                                         </button>
                                                         <button
-                                                            onClick={() => onDeletePreset(preset.id)}
+                                                            onClick={() => handleDeletePreset(preset.id)}
                                                             className="text-[var(--color-muted)] hover:text-red-500 text-xs"
                                                         >
                                                             [ x ]
@@ -618,7 +533,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                         <div className="flex flex-col gap-3">
 
                                             <div
-                                                onClick={onToggleWidgetTitles}
+                                                onClick={() => setShowWidgetTitles(!showWidgetTitles)}
                                                 className="flex items-center gap-2 cursor-pointer select-none group"
                                             >
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
@@ -628,7 +543,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             </div>
 
                                             <div
-                                                onClick={onToggleReserveSettings}
+                                                onClick={() => setReserveSettingsSpace(!reserveSettingsSpace)}
                                                 className="flex items-center gap-2 cursor-pointer select-none group mt-3"
                                             >
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
@@ -644,7 +559,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                                     placeholder="e.g. Comic Sans MS, Arial"
                                                     className="bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-fg)] px-2 py-1 text-sm focus:border-[var(--color-accent)] outline-none w-full select-text font-sans"
                                                     value={customFont}
-                                                    onChange={(e) => onCustomFontChange(e.target.value)}
+                                                    onChange={(e) => setCustomFont(e.target.value)}
                                                 />
                                                 <span className="text-[var(--color-muted)] text-[10px] opacity-60">Press enter or click away to apply.</span>
                                             </div>
@@ -657,7 +572,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                                     min={0}
                                                     max={24}
                                                     displayValue={`${widgetRadius}px`}
-                                                    onChange={(v) => onWidgetRadiusChange?.(v)}
+                                                    onChange={(v) => setWidgetRadius(v)}
                                                     hint="0 = sharp corners, 24 = very round"
                                                 />
                                             </div>
@@ -671,13 +586,13 @@ export const Settings: React.FC<SettingsProps> = ({
 
                                             <div className="flex items-center gap-4">
                                                 <button
-                                                    onClick={onToggleLayoutLock}
+                                                    onClick={() => setIsLayoutLocked(!isLayoutLocked)}
                                                     className={`px-3 py-1 border text-xs font-mono transition-colors no-radius ${isLayoutLocked ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-fg)]'}`}
                                                 >
                                                     [{isLayoutLocked ? 'LOCKED' : 'UNLOCKED'}]
                                                 </button>
                                                 <button
-                                                    onClick={onResetLayout}
+                                                    onClick={resetLayout}
                                                     className="px-3 py-1 border border-[var(--color-border)] text-[var(--color-muted)] hover:text-red-500 hover:border-red-500 text-xs font-mono no-radius"
                                                 >
                                                     [RESET TO DEFAULT]
@@ -686,7 +601,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
 
                                             <div
-                                                onClick={onToggleResizing}
+                                                onClick={() => setIsResizingEnabled(!isResizingEnabled)}
                                                 className="flex items-center gap-2 cursor-pointer mt-2 group text-xs font-mono text-left select-none"
                                             >
                                                 <span className={`text-[var(--color-accent)] font-bold`}>
@@ -703,25 +618,25 @@ export const Settings: React.FC<SettingsProps> = ({
                                     <div className="border border-[var(--color-border)] p-4">
                                         <h3 className="text-[var(--color-accent)] font-bold mb-2">Stats Widget Style</h3>
                                         <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-                                            <div onClick={() => onStatsModeChange('text')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                            <div onClick={() => setStatsMode('text')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
                                                     {statsMode === 'text' ? '[x]' : '[ ]'}
                                                 </span>
                                                 <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Text</span>
                                             </div>
-                                            <div onClick={() => onStatsModeChange('graph')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                            <div onClick={() => setStatsMode('graph')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
                                                     {statsMode === 'graph' ? '[x]' : '[ ]'}
                                                 </span>
                                                 <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Graphs</span>
                                             </div>
-                                            <div onClick={() => onStatsModeChange('detailed')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                            <div onClick={() => setStatsMode('detailed')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
                                                     {statsMode === 'detailed' ? '[x]' : '[ ]'}
                                                 </span>
                                                 <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Detailed</span>
                                             </div>
-                                            <div onClick={() => onStatsModeChange('minimal')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                            <div onClick={() => setStatsMode('minimal')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                 <span className="font-mono text-[var(--color-accent)] font-bold">
                                                     {statsMode === 'minimal' ? '[x]' : '[ ]'}
                                                 </span>
@@ -736,13 +651,13 @@ export const Settings: React.FC<SettingsProps> = ({
                                         <div className="flex flex-col gap-4">
 
                                             <div className="flex flex-col sm:flex-row gap-4">
-                                                <div onClick={() => onWeatherModeChange('standard')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                                <div onClick={() => setWeatherMode('standard')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                     <span className="font-mono text-[var(--color-accent)] font-bold">
                                                         {weatherMode === 'standard' ? '[x]' : '[ ]'}
                                                     </span>
                                                     <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Standard</span>
                                                 </div>
-                                                <div onClick={() => onWeatherModeChange('icon')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                                <div onClick={() => setWeatherMode('icon')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                     <span className="font-mono text-[var(--color-accent)] font-bold">
                                                         {weatherMode === 'icon' ? '[x]' : '[ ]'}
                                                     </span>
@@ -753,13 +668,13 @@ export const Settings: React.FC<SettingsProps> = ({
 
                                             <div className="flex items-center gap-4 mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
                                                 <span className="text-[var(--color-muted)] text-sm">Units:</span>
-                                                <div onClick={() => onTempUnitChange('C')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                                <div onClick={() => setTempUnit('C')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                     <span className="font-mono text-[var(--color-accent)] font-bold">
                                                         {tempUnit === 'C' ? '[x]' : '[ ]'}
                                                     </span>
                                                     <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Celsius (°C)</span>
                                                 </div>
-                                                <div onClick={() => onTempUnitChange('F')} className="flex items-center gap-2 cursor-pointer select-none group">
+                                                <div onClick={() => setTempUnit('F')} className="flex items-center gap-2 cursor-pointer select-none group">
                                                     <span className="font-mono text-[var(--color-accent)] font-bold">
                                                         {tempUnit === 'F' ? '[x]' : '[ ]'}
                                                     </span>
@@ -772,7 +687,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
                                     <div className="border border-[var(--color-border)] p-4">
                                         <h3 className="text-[var(--color-accent)] font-bold mb-2">Link Behavior</h3>
-                                        <div onClick={() => onToggleOpenInNewTab?.()} className="flex items-center gap-2 cursor-pointer select-none group">
+                                        <div onClick={() => setOpenInNewTab(!openInNewTab)} className="flex items-center gap-2 cursor-pointer select-none group">
                                             <span className="font-mono text-[var(--color-accent)] font-bold">
                                                 {openInNewTab ? '[x]' : '[ ]'}
                                             </span>
@@ -788,27 +703,27 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Drop Speed" value={funOptions.matrix.speed} min={5} max={200}
                                                 displayValue={`${funOptions.matrix.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, matrix: { ...funOptions.matrix, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, matrix: { ...funOptions.matrix, speed: v } })}
                                             />
 
                                             <AsciiSlider
                                                 label="Trail Fade" value={funOptions.matrix.fade} min={0.01} max={0.3} step={0.01}
                                                 displayValue={`${Math.round((1 - funOptions.matrix.fade * 3.33) * 100)}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, matrix: { ...funOptions.matrix, fade: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, matrix: { ...funOptions.matrix, fade: v } })}
                                                 hint="Lower = longer trails"
                                             />
 
                                             <AsciiSlider
                                                 label="Letter Size" value={funOptions.matrix.fontSize} min={8} max={32}
                                                 displayValue={`${funOptions.matrix.fontSize}px`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, matrix: { ...funOptions.matrix, fontSize: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, matrix: { ...funOptions.matrix, fontSize: v } })}
                                             />
 
 
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs text-[var(--color-fg)]">Glow Letters</span>
                                                 <div
-                                                    onClick={() => onFunOptionsChange({ ...funOptions, matrix: { ...funOptions.matrix, glow: !funOptions.matrix.glow } })}
+                                                    onClick={() => setFunOptions({ ...funOptions, matrix: { ...funOptions.matrix, glow: !funOptions.matrix.glow } })}
                                                     className="cursor-pointer text-xs font-mono text-[var(--color-accent)] hover:text-[var(--color-fg)] transition-colors select-none"
                                                 >
                                                     {funOptions.matrix.glow ? '[x]' : '[ ]'}
@@ -822,7 +737,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                                     {(['mixed', 'numbers', 'latin'] as const).map((mode) => (
                                                         <div
                                                             key={mode}
-                                                            onClick={() => onFunOptionsChange({ ...funOptions, matrix: { ...funOptions.matrix, charSet: mode } })}
+                                                            onClick={() => setFunOptions({ ...funOptions, matrix: { ...funOptions.matrix, charSet: mode } })}
                                                             className={`cursor-pointer px-2 py-1 border ${funOptions.matrix.charSet === mode ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}
                                                         >
                                                             {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -840,32 +755,32 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Draw Speed" value={funOptions.pipes.speed} min={5} max={200}
                                                 displayValue={`${funOptions.pipes.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, pipes: { ...funOptions.pipes, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, pipes: { ...funOptions.pipes, speed: v } })}
                                             />
 
                                             <AsciiSlider
                                                 label="Trail Length" value={funOptions.pipes.fade} min={0.01} max={0.5} step={0.01}
                                                 displayValue={`${Math.round((1 - funOptions.pipes.fade * 2) * 100)}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, pipes: { ...funOptions.pipes, fade: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, pipes: { ...funOptions.pipes, fade: v } })}
                                                 hint="Lower = longer trails"
                                             />
 
                                             <AsciiSlider
                                                 label="Lifetime" value={funOptions.pipes.lifetime} min={20} max={300} step={5}
                                                 displayValue={`${funOptions.pipes.lifetime} steps`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, pipes: { ...funOptions.pipes, lifetime: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, pipes: { ...funOptions.pipes, lifetime: v } })}
                                                 hint="How long before a pipe resets"
                                             />
 
                                             <AsciiSlider
                                                 label="Pipe Count" value={funOptions.pipes.count} min={1} max={10}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, pipes: { ...funOptions.pipes, count: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, pipes: { ...funOptions.pipes, count: v } })}
                                             />
 
                                             <AsciiSlider
                                                 label="Pipe Size" value={funOptions.pipes.fontSize} min={8} max={32}
                                                 displayValue={`${funOptions.pipes.fontSize}px`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, pipes: { ...funOptions.pipes, fontSize: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, pipes: { ...funOptions.pipes, fontSize: v } })}
                                             />
                                         </div>
                                     )}
@@ -877,7 +792,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Spin Speed" value={funOptions.donut.speed} min={5} max={200}
                                                 displayValue={`${funOptions.donut.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, donut: { ...funOptions.donut, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, donut: { ...funOptions.donut, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -888,7 +803,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Speed" value={funOptions.snake.speed} min={5} max={100}
                                                 displayValue={`${funOptions.snake.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, snake: { ...funOptions.snake, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, snake: { ...funOptions.snake, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -899,7 +814,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Speed" value={funOptions.life.speed} min={5} max={100}
                                                 displayValue={`${funOptions.life.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, life: { ...funOptions.life, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, life: { ...funOptions.life, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -910,12 +825,12 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Explosion Size" value={funOptions.fireworks.explosionSize ?? 50} min={10} max={200}
                                                 displayValue={`${funOptions.fireworks.explosionSize ?? 50}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, fireworks: { ...funOptions.fireworks, explosionSize: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, fireworks: { ...funOptions.fireworks, explosionSize: v } })}
                                             />
                                             <AsciiSlider
                                                 label="Frequency" value={funOptions.fireworks.speed} min={55} max={400}
                                                 displayValue={`${funOptions.fireworks.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, fireworks: { ...funOptions.fireworks, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, fireworks: { ...funOptions.fireworks, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -926,7 +841,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Warp Speed" value={funOptions.starfield.speed} min={5} max={100}
                                                 displayValue={`${funOptions.starfield.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, starfield: { ...funOptions.starfield, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, starfield: { ...funOptions.starfield, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -937,7 +852,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Intensity" value={funOptions.rain.speed} min={5} max={100}
                                                 displayValue={`${funOptions.rain.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, rain: { ...funOptions.rain, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, rain: { ...funOptions.rain, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -948,7 +863,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             <AsciiSlider
                                                 label="Generation Speed" value={funOptions.maze.speed} min={5} max={100}
                                                 displayValue={`${funOptions.maze.speed}%`}
-                                                onChange={(v) => onFunOptionsChange({ ...funOptions, maze: { ...funOptions.maze, speed: v } })}
+                                                onChange={(v) => setFunOptions({ ...funOptions, maze: { ...funOptions.maze, speed: v } })}
                                             />
                                         </div>
                                     )}
@@ -960,7 +875,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                             className="w-full h-40 bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-fg)] p-2 font-mono text-xs focus:border-[var(--color-accent)] outline-none select-text"
                                             placeholder=".tui-box { border-radius: 10px; }"
                                             value={customCss}
-                                            onChange={(e) => onCustomCssChange(e.target.value)}
+                                            onChange={(e) => setCustomCss(e.target.value)}
                                         />
                                     </div>
 
