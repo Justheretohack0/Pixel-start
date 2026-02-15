@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createGrid, countNeighbors, computeNextGeneration } from '../utils/gameOfLifeUtils';
 
 interface GameOfLifeWidgetProps {
     speed?: number;
@@ -50,48 +51,17 @@ export const GameOfLifeWidget: React.FC<GameOfLifeWidgetProps> = ({ speed = 50 }
         let prevLiveCells = 0;
 
         const randomize = () => {
-            grid = [];
-            for (let y = 0; y < rows; y++) {
-                grid[y] = [];
-                for (let x = 0; x < cols; x++) {
-                    grid[y][x] = Math.random() < 0.3;
-                }
-            }
+            grid = createGrid(rows, cols);
             generation = 0;
             staleCount = 0;
         };
 
         randomize();
 
-        const countNeighbors = (x: number, y: number): number => {
-            let count = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (dx === 0 && dy === 0) continue;
-                    const ny = (y + dy + rows) % rows;
-                    const nx = (x + dx + cols) % cols;
-                    if (grid[ny][nx]) count++;
-                }
-            }
-            return count;
-        };
-
         const step = () => {
-            const next: boolean[][] = [];
-            let liveCells = 0;
-            for (let y = 0; y < rows; y++) {
-                next[y] = [];
-                for (let x = 0; x < cols; x++) {
-                    const n = countNeighbors(x, y);
-                    if (grid[y][x]) {
-                        next[y][x] = n === 2 || n === 3;
-                    } else {
-                        next[y][x] = n === 3;
-                    }
-                    if (next[y][x]) liveCells++;
-                }
-            }
-            grid = next;
+            const result = computeNextGeneration(grid, rows, cols);
+            grid = result.nextGrid;
+            const liveCells = result.liveCells;
             generation++;
 
             // Detect stale state and re-randomize
@@ -137,7 +107,7 @@ export const GameOfLifeWidget: React.FC<GameOfLifeWidgetProps> = ({ speed = 50 }
             for (let y = 0; y < rows; y++) {
                 for (let x = 0; x < cols; x++) {
                     if (grid[y][x]) {
-                        const n = countNeighbors(x, y);
+                        const n = countNeighbors(grid, x, y, rows, cols);
                         // Color intensity based on neighbor count
                         if (n === 3) {
                             ctx.fillStyle = colors.accent;
