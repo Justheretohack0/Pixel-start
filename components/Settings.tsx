@@ -69,51 +69,28 @@ interface SettingsProps {
 
 type Tab = 'themes' | 'shortcuts' | 'widgets' | 'advanced' | 'presets';
 
+export const Settings: React.FC = () => {
+    const {
+        currentTheme, setCurrentTheme,
+        customThemes, handleDeleteCustomTheme, setIsThemeMakerOpen,
+        linkGroups, setLinkGroups,
+        customCss, setCustomCss,
+        statsMode, setStatsMode,
+        weatherMode, setWeatherMode,
+        tempUnit, setTempUnit,
+        isLayoutLocked, setIsLayoutLocked,
+        isResizingEnabled, setIsResizingEnabled,
+        resetLayout,
+        activeWidgets, toggleWidget, addExtraWidget,
+        showWidgetTitles, setShowWidgetTitles,
+        customFont, setCustomFont,
+        reserveSettingsSpace, setReserveSettingsSpace,
+        funOptions, setFunOptions,
+        presets, handleSavePreset, handleLoadPreset, handleDeletePreset,
+        widgetRadius, setWidgetRadius,
+        openInNewTab, setOpenInNewTab
+    } = useAppContext();
 
-
-export const Settings: React.FC<SettingsProps> = ({
-    currentTheme,
-    onThemeChange,
-    linkGroups,
-    onUpdateLinks,
-    customCss,
-    onCustomCssChange,
-    statsMode,
-    onStatsModeChange,
-    weatherMode,
-    onWeatherModeChange,
-    tempUnit,
-    onTempUnitChange,
-    isLayoutLocked,
-    onToggleLayoutLock,
-    isResizingEnabled,
-    onToggleResizing,
-    onResetLayout,
-    activeWidgets = {},
-    onToggleWidget,
-    onAddWidget,
-    showWidgetTitles,
-    onToggleWidgetTitles,
-    customFont,
-    onCustomFontChange,
-    reserveSettingsSpace,
-    onToggleReserveSettings,
-
-    customThemes = {},
-    onDeleteCustomTheme,
-    onOpenThemeMaker,
-
-    funOptions,
-    onFunOptionsChange,
-    presets,
-    onSavePreset,
-    onLoadPreset,
-    onDeletePreset,
-    widgetRadius = 4,
-    onWidgetRadiusChange,
-    openInNewTab,
-    onToggleOpenInNewTab,
-}) => {
     const [isButtonVisible, setIsButtonVisible] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<Tab>('themes');
@@ -218,7 +195,7 @@ export const Settings: React.FC<SettingsProps> = ({
                         <div className="flex gap-4 justify-center">
                             <button
                                 onClick={() => {
-                                    onAddWidget(widgetToDuplicate);
+                                    addExtraWidget(widgetToDuplicate);
                                     setWidgetToDuplicate(null);
                                 }}
                                 className="px-4 py-1 border border-[var(--color-border)] text-[var(--color-accent)] hover:bg-[var(--color-hover)] no-radius"
