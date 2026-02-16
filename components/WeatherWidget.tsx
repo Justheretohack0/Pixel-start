@@ -9,7 +9,7 @@ interface WeatherWidgetProps {
 }
 
 export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ mode = 'standard', unit = 'C' }) => {
-  const { data, loading, error } = useWeather();
+  const { data, loading, error, refetch } = useWeather();
 
   // Responsive Logic for Standard Mode
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,11 +51,27 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ mode = 'standard',
   }
 
   if (error || !data) {
+    const isTimeout = error?.toLowerCase().includes("timed out");
+    const isPermission = error?.toLowerCase().includes("denied") || error?.toLowerCase().includes("permission");
+
+    let errorText = error || 'no data';
+    if (isTimeout) errorText = "Request Timed Out";
+
     return (
       <div className="h-full flex flex-col items-center justify-center gap-2 text-[var(--color-muted)] select-none px-4">
         <span className="text-sm font-mono text-[var(--color-accent)]">⚠</span>
-        <span className="text-xs font-mono opacity-70 text-center">{error || 'no data'}</span>
-        <span className="text-[10px] font-mono opacity-40">check location permissions</span>
+        <span className="text-xs font-mono opacity-70 text-center">{errorText}</span>
+
+        {isPermission && (
+          <span className="text-[10px] font-mono opacity-40">check location permissions</span>
+        )}
+
+        <button
+          onClick={refetch}
+          className="text-[10px] border border-[var(--color-border)] px-2 py-1 rounded hover:bg-[var(--color-bg-secondary)] transition-colors opacity-60 hover:opacity-100 mt-2"
+        >
+          retry
+        </button>
       </div>
     );
   }

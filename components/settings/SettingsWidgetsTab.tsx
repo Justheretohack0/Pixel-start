@@ -4,14 +4,12 @@ import { WidgetToggle } from '../WidgetToggle';
 interface SettingsWidgetsTabProps {
     activeWidgets: Record<string, boolean>;
     onToggleWidget: (key: string) => void;
-    onAddWidget: (type: string) => void;
     setWidgetToDuplicate: (widget: string | null) => void;
 }
 
 export const SettingsWidgetsTab: React.FC<SettingsWidgetsTabProps> = ({
     activeWidgets,
     onToggleWidget,
-    onAddWidget,
     setWidgetToDuplicate,
 }) => {
     const CoreWidgets = ['search', 'datetime', 'stats', 'weather', 'todo', 'links'];
