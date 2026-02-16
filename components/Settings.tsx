@@ -1,71 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAppContext } from '../contexts/AppContext';
 import { SettingsThemesTab } from './settings/SettingsThemesTab';
 import { SettingsWidgetsTab } from './settings/SettingsWidgetsTab';
 import { SettingsShortcutsTab } from './settings/SettingsShortcutsTab';
 import { SettingsPresetsTab } from './settings/SettingsPresetsTab';
 import { SettingsAdvancedTab } from './settings/SettingsAdvancedTab';
-import { LinkGroup } from '../types';
-
-interface SettingsProps {
-    currentTheme: string;
-    onThemeChange: (themeName: string) => void;
-    linkGroups: LinkGroup[];
-    onUpdateLinks: (groups: LinkGroup[]) => void;
-    customCss: string;
-    onCustomCssChange: (css: string) => void;
-    statsMode: 'text' | 'graph' | 'detailed' | 'minimal';
-    onStatsModeChange: (mode: 'text' | 'graph' | 'detailed' | 'minimal') => void;
-    weatherMode: 'standard' | 'icon';
-    onWeatherModeChange: (mode: 'standard' | 'icon') => void;
-    tempUnit: 'C' | 'F';
-    onTempUnitChange: (unit: 'C' | 'F') => void;
-    isLayoutLocked: boolean;
-    onToggleLayoutLock: () => void;
-    isResizingEnabled: boolean;
-    onToggleResizing: () => void;
-    onResetLayout: () => void;
-    activeWidgets: Record<string, boolean>;
-    onToggleWidget: (key: string) => void;
-    onAddWidget: (type: string) => void;
-
-
-    showWidgetTitles: boolean;
-    onToggleWidgetTitles: () => void;
-    customFont: string;
-    onCustomFontChange: (font: string) => void;
-    reserveSettingsSpace: boolean;
-    onToggleReserveSettings: () => void;
-    funOptions: {
-        matrix: { speed: number; fade: number; charSet: 'numbers' | 'latin' | 'mixed'; charFlux: number; glow: boolean; fontSize: number };
-        pipes: { speed: number; fade: number; count: number; fontSize: number; lifetime: number };
-        donut: { speed: number };
-        snake: { speed: number };
-        life: { speed: number };
-        fireworks: { speed: number; explosionSize: number };
-        starfield: { speed: number };
-        rain: { speed: number };
-        maze: { speed: number };
-    };
-    onFunOptionsChange: (options: any) => void;
-
-
-    presets: any[];
-    onSavePreset: (name: string) => void;
-    onLoadPreset: (preset: any) => void;
-    onDeletePreset: (id: number) => void;
-
-    customThemes?: Record<string, any>;
-    onDeleteCustomTheme?: (name: string) => void;
-    onOpenThemeMaker?: () => void;
-
-
-    widgetRadius?: number;
-    onWidgetRadiusChange?: (value: number) => void;
-
-
-    openInNewTab?: boolean;
-    onToggleOpenInNewTab?: () => void;
-}
 
 type Tab = 'themes' | 'shortcuts' | 'widgets' | 'advanced' | 'presets';
 
@@ -261,10 +200,10 @@ export const Settings: React.FC = () => {
                             {activeTab === 'themes' && (
                                 <SettingsThemesTab
                                     currentTheme={currentTheme}
-                                    onThemeChange={onThemeChange}
-                                    customThemes={customThemes}
-                                    onDeleteCustomTheme={onDeleteCustomTheme}
-                                    onOpenThemeMaker={onOpenThemeMaker}
+                                    onThemeChange={setCurrentTheme}
+                                    customThemes={customThemes || {}}
+                                    onDeleteCustomTheme={handleDeleteCustomTheme}
+                                    onOpenThemeMaker={() => setIsThemeMakerOpen(true)}
                                 />
                             )}
 
@@ -272,8 +211,7 @@ export const Settings: React.FC = () => {
                             {activeTab === 'widgets' && (
                                 <SettingsWidgetsTab
                                     activeWidgets={activeWidgets}
-                                    onToggleWidget={onToggleWidget}
-                                    onAddWidget={onAddWidget}
+                                    onToggleWidget={toggleWidget}
                                     setWidgetToDuplicate={setWidgetToDuplicate}
                                 />
                             )}
@@ -282,7 +220,7 @@ export const Settings: React.FC = () => {
                             {activeTab === 'shortcuts' && (
                                 <SettingsShortcutsTab
                                     linkGroups={linkGroups}
-                                    onUpdateLinks={onUpdateLinks}
+                                    onUpdateLinks={setLinkGroups}
                                 />
                             )}
 
@@ -290,9 +228,9 @@ export const Settings: React.FC = () => {
                             {activeTab === 'presets' && (
                                 <SettingsPresetsTab
                                     presets={presets}
-                                    onSavePreset={onSavePreset}
-                                    onLoadPreset={onLoadPreset}
-                                    onDeletePreset={onDeletePreset}
+                                    onSavePreset={handleSavePreset}
+                                    onLoadPreset={handleLoadPreset}
+                                    onDeletePreset={handleDeletePreset}
                                 />
                             )}
 
@@ -300,31 +238,31 @@ export const Settings: React.FC = () => {
                             {activeTab === 'advanced' && (
                                 <SettingsAdvancedTab
                                     showWidgetTitles={showWidgetTitles}
-                                    onToggleWidgetTitles={onToggleWidgetTitles}
+                                    onToggleWidgetTitles={() => setShowWidgetTitles(!showWidgetTitles)}
                                     reserveSettingsSpace={reserveSettingsSpace}
-                                    onToggleReserveSettings={onToggleReserveSettings}
+                                    onToggleReserveSettings={() => setReserveSettingsSpace(!reserveSettingsSpace)}
                                     customFont={customFont}
-                                    onCustomFontChange={onCustomFontChange}
+                                    onCustomFontChange={setCustomFont}
                                     widgetRadius={widgetRadius}
-                                    onWidgetRadiusChange={onWidgetRadiusChange}
+                                    onWidgetRadiusChange={setWidgetRadius}
                                     isLayoutLocked={isLayoutLocked}
-                                    onToggleLayoutLock={onToggleLayoutLock}
-                                    onResetLayout={onResetLayout}
+                                    onToggleLayoutLock={() => setIsLayoutLocked(!isLayoutLocked)}
+                                    onResetLayout={resetLayout}
                                     isResizingEnabled={isResizingEnabled}
-                                    onToggleResizing={onToggleResizing}
+                                    onToggleResizing={() => setIsResizingEnabled(!isResizingEnabled)}
                                     statsMode={statsMode}
-                                    onStatsModeChange={onStatsModeChange}
+                                    onStatsModeChange={setStatsMode}
                                     weatherMode={weatherMode}
-                                    onWeatherModeChange={onWeatherModeChange}
+                                    onWeatherModeChange={setWeatherMode}
                                     tempUnit={tempUnit}
-                                    onTempUnitChange={onTempUnitChange}
+                                    onTempUnitChange={setTempUnit}
                                     openInNewTab={openInNewTab}
-                                    onToggleOpenInNewTab={onToggleOpenInNewTab}
+                                    onToggleOpenInNewTab={() => setOpenInNewTab(!openInNewTab)}
                                     activeWidgets={activeWidgets}
                                     funOptions={funOptions}
-                                    onFunOptionsChange={onFunOptionsChange}
+                                    onFunOptionsChange={setFunOptions}
                                     customCss={customCss}
-                                    onCustomCssChange={onCustomCssChange}
+                                    onCustomCssChange={setCustomCss}
                                 />
                             )}
 
