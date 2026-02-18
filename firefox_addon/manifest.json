@@ -16,5 +16,5 @@
       "strict_min_version": "109.0"
     }
   },
-  "content_security_policy": "script-src 'self'; object-src 'self';"
+  "content_security_policy": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; connect-src *;"
 }
