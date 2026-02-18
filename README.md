@@ -17,8 +17,9 @@
 ---
 
 
+## Install in firefox (extension)
 
-
+Download this [firefox addon](https://addons.mozilla.org/en-US/firefox/addon/pixel-start/)
 
 
 ## Build
@@ -73,4 +74,3 @@ Output: `pixel-start-v2.1.xpi`
 
 - Hover over the top right section for settings.
 
-- Will add a firefox addon link here when it is approved.
