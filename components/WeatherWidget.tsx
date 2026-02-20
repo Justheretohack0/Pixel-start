@@ -10,7 +10,7 @@ interface WeatherWidgetProps {
 
 export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ mode = 'standard', unit = 'C' }) => {
   const { data, loading, error, refetch } = useWeather();
-
+  
   // Responsive Logic for Standard Mode
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleForecastCount, setVisibleForecastCount] = useState(2);

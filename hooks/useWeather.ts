@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, processWeatherData } from '../utils/weatherUtils';
+import { useAppContext } from '../contexts/AppContext';
 
 export const useWeather = () => {
+  const { weatherLocation } = useAppContext();
   const [data, setData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +126,14 @@ export const useWeather = () => {
 
     return () => clearTimeout(timer);
   }, [fetchWeather]);
+
+
+  useEffect(() => { 
+    // Refetch when location changes (e.g. user updates in settings)
+    if (weatherLocation.latitude && weatherLocation.longitude && weatherLocation.latitude !== null && weatherLocation.longitude !== null) {
+      fetchWeather(Number(weatherLocation.latitude), Number(weatherLocation.longitude), { showError: true });
+    }
+  }, [weatherLocation]); // Listen for location changes
 
   return { data, loading, error, refetch };
 };

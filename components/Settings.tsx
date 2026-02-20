@@ -27,7 +27,8 @@ export const Settings: React.FC = () => {
         funOptions, setFunOptions,
         presets, handleSavePreset, handleLoadPreset, handleDeletePreset,
         widgetRadius, setWidgetRadius,
-        openInNewTab, setOpenInNewTab
+        openInNewTab, setOpenInNewTab,
+        weatherLocation, setWeatherLocation,
     } = useAppContext();
 
     const [isButtonVisible, setIsButtonVisible] = useState(false);
@@ -263,6 +264,8 @@ export const Settings: React.FC = () => {
                                     onFunOptionsChange={setFunOptions}
                                     customCss={customCss}
                                     onCustomCssChange={setCustomCss}
+                                    weatherLocation={weatherLocation}
+                                    setWeatherLocation={setWeatherLocation}
                                 />
                             )}
 

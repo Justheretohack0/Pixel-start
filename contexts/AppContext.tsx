@@ -91,6 +91,9 @@ interface AppContextType {
     presets: any[];
     setPresets: (presets: any[]) => void;
 
+    weatherLocation: { latitude: null | number; longitude: null | number };
+    setWeatherLocation: (location: { latitude: null | number; longitude: null | number }) => void;
+
     // Actions
     handleSaveCustomTheme: (newTheme: Theme) => void;
     handleDeleteCustomTheme: (name: string) => void;
@@ -130,6 +133,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [customFont, setCustomFont] = useStickyState<string>('', 'tui-custom-font');
 
     const [funOptionsRaw, setFunOptions] = useStickyState<FunOptions>(funDefaults, 'tui-fun-options-v3');
+    
+    const [weatherLocation, setWeatherLocation] = useStickyState<{ latitude: null | number; longitude: null | number }>({ latitude: null, longitude: null }, 'tui-weather-location');
+
 
     // merge defaults
     const funOptions = {
@@ -449,6 +455,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isLayoutLocked, setIsLayoutLocked,
         isResizingEnabled, setIsResizingEnabled,
         presets, setPresets,
+        weatherLocation, setWeatherLocation,
         handleSaveCustomTheme,
         handleDeleteCustomTheme,
         resetLayout,

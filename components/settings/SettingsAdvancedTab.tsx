@@ -38,6 +38,9 @@ interface SettingsAdvancedTabProps {
     onFunOptionsChange: (options: any) => void;
     customCss: string;
     onCustomCssChange: (css: string) => void;
+    weatherLocation: { latitude: null | number; longitude: null | number };
+    setWeatherLocation: (location: { latitude:  null | number; longitude: null | number }) => void;
+
 }
 
 export const SettingsAdvancedTab: React.FC<SettingsAdvancedTabProps> = ({
@@ -67,6 +70,7 @@ export const SettingsAdvancedTab: React.FC<SettingsAdvancedTabProps> = ({
     onFunOptionsChange,
     customCss,
     onCustomCssChange,
+    weatherLocation, setWeatherLocation,
 }) => {
     return (
         <div className="space-y-6">
@@ -224,6 +228,20 @@ export const SettingsAdvancedTab: React.FC<SettingsAdvancedTabProps> = ({
                             <span className="text-[var(--color-fg)] group-hover:text-[var(--color-accent)]">Fahrenheit (°F)</span>
                         </div>
                     </div>
+
+
+                    <div className="flex flex-col gap-2 mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
+                        <h3 className="text-[var(--color-accent)] font-bold ">Weather Location</h3>
+                        <div className="flex flex-col gap-1 ">
+                            <label htmlFor="latitude" className="text-[var(--color-muted)] text-sm">Latitude</label>
+                            <input type="text" id="latitude" className="bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-fg)] px-2 py-1 text-sm focus:border-[var(--color-accent)] outline-none w-full select-text font-sans" placeholder={String(weatherLocation.latitude ?? '1.234567')} onChange={(e) => setWeatherLocation({ latitude: Number(e.target.value), longitude: weatherLocation.longitude })}/>
+                         </div>
+                         <div className="flex flex-col gap-1 ">
+                            <label htmlFor="longitude" className="text-[var(--color-muted)] text-sm">Longitude</label>
+                            <input type="text" id="longitude" className="bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-fg)] px-2 py-1 text-sm focus:border-[var(--color-accent)] outline-none w-full select-text font-sans" placeholder={String(weatherLocation.longitude ?? '1.234567')} onChange={(e) => setWeatherLocation({ latitude: weatherLocation.latitude, longitude: Number(e.target.value) })}/>  
+                        </div>  
+                    </div>
+
                 </div>
             </div>
 
